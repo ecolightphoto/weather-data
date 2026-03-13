@@ -44,6 +44,7 @@ jobs:
           echo "Station Name: ${{ secrets.STATION_NAME || 'Default Station' }}"
           echo "Latitude: ${{ secrets.STATION_LAT || '42.7325' }}"
           echo "Longitude: ${{ secrets.STATION_LON || '-84.5555' }}"
+          echo "WU API Key: ${{ secrets.WU_API_KEY && '***SET***' || 'NOT SET' }}"
           echo "Trigger: ${{ github.event_name }}"
           echo "======================================"
       
@@ -53,6 +54,7 @@ jobs:
           STATION_NAME: ${{ secrets.STATION_NAME || 'Default Station' }}
           STATION_LAT: ${{ inputs.station_lat || secrets.STATION_LAT || '42.7325' }}
           STATION_LON: ${{ inputs.station_lon || secrets.STATION_LON || '-84.5555' }}
+          WU_API_KEY: ${{ secrets.WU_API_KEY }}
           OUTPUT_DIR: snapshots
         run: |
           python scripts/fetch_forecasts.py

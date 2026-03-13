@@ -84,21 +84,108 @@ def fetch_nws_forecast(latitude: float, longitude: float) -> Optional[List[Dict]
 
 def fetch_weather_underground_forecast(latitude: float, longitude: float) -> Optional[List[Dict]]:
     """
-    Fetch Weather Underground forecast via public API.
-    Note: WU has deprecated their free API. This is a placeholder.
-    You may need to implement scraping or use a different service.
+    Fetch Weather Underground forecast via Weather.com v3 API.
+    Uses PWS-compatible API key.
     """
-    log("📡 Attempting to fetch Weather Underground forecast...")
-    log("⚠️  Weather Underground free API is deprecated")
-    log("⚠️  Returning empty forecast - implement alternative source if needed")
+    log("📡 Fetching Weather Underground forecast...")
     
-    # Placeholder: Return empty list
-    # In production, you might:
-    # 1. Use WU paid API with credentials
-    # 2. Use alternative weather service (Weather.com, etc.)
-    # 3. Implement web scraping (not recommended)
+    # Get API key from environment
+    api_key = os.getenv('WU_API_KEY')
+    if not api_key:
+        log("⚠️  WU_API_KEY not found in environment - skipping WU forecast")
+        return []
     
-    return []
+    # Weather Underground v3 daily forecast API (5-day forecast)
+    params = {
+        'geocode': f'{latitude},{longitude}',
+        'format': 'json',
+        'units': 'e',  # English units (Fahrenheit, mph)
+        'language': 'en-US',
+        'apiKey': api_key
+    }
+    
+    url = f"https://api.weather.com/v3/wx/forecast/daily/5day?{urllib.parse.urlencode(params)}"
+    data = fetch_json(url)
+    
+    if not data:
+        log("❌ Failed to get Weather Underground forecast data")
+        return []
+    
+    # Convert WU v3 format to ForecastPeriod-like format
+    periods = []
+    
+    try:
+        day_count = len(data.get('dayOfWeek', []))
+        
+        for i in range(day_count):
+            day_name = data.get('dayOfWeek', [])[i] if i < len(data.get('dayOfWeek', [])) else None
+            temp_max = data.get('temperatureMax', [])[i] if i < len(data.get('temperatureMax', [])) else None
+            temp_min = data.get('temperatureMin', [])[i] if i < len(data.get('temperatureMin', [])) else None
+            narrative = data.get('narrative', [])[i] if i < len(data.get('narrative', [])) else ''
+            valid_time = data.get('validTimeLocal', [])[i] if i < len(data.get('validTimeLocal', [])) else ''
+            
+            # Skip if missing critical data
+            if not day_name or temp_max is None or temp_min is None:
+                continue
+            
+            # Get daypart data (contains day and night details)
+            daypart = data.get('daypart', [{}])[0] if data.get('daypart') else {}
+            
+            # Day period
+            day_idx = i * 2
+            if day_idx < len(daypart.get('windSpeed', [])):
+                wind_speed = daypart.get('windSpeed', [])[day_idx]
+                wind_dir = daypart.get('windDirectionCardinal', [])[day_idx] if day_idx < len(daypart.get('windDirectionCardinal', [])) else 'N'
+                phrase = daypart.get('wxPhraseLong', [])[day_idx] if day_idx < len(daypart.get('wxPhraseLong', [])) else 'Partly Cloudy'
+                precip_chance = daypart.get('precipChance', [])[day_idx] if day_idx < len(daypart.get('precipChance', [])) else None
+                humidity = daypart.get('relativeHumidity', [])[day_idx] if day_idx < len(daypart.get('relativeHumidity', [])) else None
+                
+                periods.append({
+                    'number': i * 2 + 1,
+                    'name': day_name,
+                    'temperature': temp_max,
+                    'temperatureUnit': 'F',
+                    'windSpeed': f'{wind_speed} mph' if wind_speed else '0 mph',
+                    'windDirection': wind_dir,
+                    'shortForecast': phrase,
+                    'detailedForecast': narrative,
+                    'icon': '',
+                    'startTime': valid_time,
+                    'probabilityOfPrecipitation': {'value': precip_chance} if precip_chance is not None else None,
+                    'relativeHumidity': {'value': humidity} if humidity is not None else None
+                })
+            
+            # Night period
+            night_idx = i * 2 + 1
+            if night_idx < len(daypart.get('windSpeed', [])):
+                wind_speed = daypart.get('windSpeed', [])[night_idx]
+                wind_dir = daypart.get('windDirectionCardinal', [])[night_idx] if night_idx < len(daypart.get('windDirectionCardinal', [])) else 'N'
+                phrase = daypart.get('wxPhraseLong', [])[night_idx] if night_idx < len(daypart.get('wxPhraseLong', [])) else 'Partly Cloudy'
+                precip_chance = daypart.get('precipChance', [])[night_idx] if night_idx < len(daypart.get('precipChance', [])) else None
+                humidity = daypart.get('relativeHumidity', [])[night_idx] if night_idx < len(daypart.get('relativeHumidity', [])) else None
+                night_name = daypart.get('daypartName', [])[night_idx] if night_idx < len(daypart.get('daypartName', [])) else f'{day_name} Night'
+                
+                periods.append({
+                    'number': i * 2 + 2,
+                    'name': night_name if night_name else f'{day_name} Night',
+                    'temperature': temp_min,
+                    'temperatureUnit': 'F',
+                    'windSpeed': f'{wind_speed} mph' if wind_speed else '0 mph',
+                    'windDirection': wind_dir,
+                    'shortForecast': phrase,
+                    'detailedForecast': narrative,
+                    'icon': '',
+                    'startTime': valid_time,
+                    'probabilityOfPrecipitation': {'value': precip_chance} if precip_chance is not None else None,
+                    'relativeHumidity': {'value': humidity} if humidity is not None else None
+                })
+        
+        log(f"✅ Fetched {len(periods)} Weather Underground forecast periods")
+        return periods
+        
+    except (KeyError, IndexError, TypeError) as e:
+        log(f"❌ Error parsing WU data: {e}")
+        return []
 
 
 def fetch_ecmwf_forecast(latitude: float, longitude: float) -> Optional[List[Dict]]:
