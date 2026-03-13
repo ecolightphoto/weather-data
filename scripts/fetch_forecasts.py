@@ -438,18 +438,11 @@ def save_snapshot(snapshot: Dict, output_dir: Path):
     # Create output directory if it doesn't exist
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    # Get current date AND TIME for filename
+    # Get current date for filename
     now = datetime.now()
     date_str = now.strftime('%Y-%m-%d')
-    time_str = now.strftime('%H%M')  # HHMM format (e.g., "0600", "1200", "1800")
     
-    # Save with date-time-based filename (keeps all snapshots)
-    dated_file = output_dir / f"{date_str}-{time_str}.json"
-    with open(dated_file, 'w') as f:
-        json.dump(snapshot, f, indent=2)
-    log(f"💾 Saved snapshot to {dated_file}")
-    
-    # Save with date-only filename (overwrites previous snapshots from same day for easy navigation)
+    # Save with date-only filename (one snapshot per day for navigation)
     daily_file = output_dir / f"{date_str}.json"
     with open(daily_file, 'w') as f:
         json.dump(snapshot, f, indent=2)
@@ -461,7 +454,7 @@ def save_snapshot(snapshot: Dict, output_dir: Path):
         json.dump(snapshot, f, indent=2)
     log(f"💾 Saved snapshot to {latest_file}")
     
-    return dated_file, daily_file, latest_file
+    return daily_file, latest_file
 
 
 
@@ -510,7 +503,7 @@ def main():
     )
     
     # Save snapshot
-    dated_file, daily_file, latest_file = save_snapshot(snapshot, output_dir)
+    daily_file, latest_file = save_snapshot(snapshot, output_dir)
     
     # Summary
     log("=" * 60)
@@ -524,7 +517,7 @@ def main():
     log(f"   ECMWF periods: {len(ecmwf_periods) if ecmwf_periods else 0}")
     if ecmwf_metadata.get('model_run_time'):
         log(f"   ECMWF model run: {ecmwf_metadata['model_run_time']}")
-    log(f"   Files created: {dated_file.name}, {daily_file.name}, {latest_file.name}")
+    log(f"   Files created: {daily_file.name}, {latest_file.name}")
     log("=" * 60)
     log("✅ Forecast snapshot collection complete")
 
