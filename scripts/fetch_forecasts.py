@@ -384,18 +384,20 @@ def create_snapshot(
     return snapshot
 
 
+
 def save_snapshot(snapshot: Dict, output_dir: Path):
     """Save snapshot to JSON files."""
     
     # Create output directory if it doesn't exist
     output_dir.mkdir(parents=True, exist_ok=True)
     
-    # Get current date for filename
+    # Get current date AND TIME for filename
     now = datetime.now()
     date_str = now.strftime('%Y-%m-%d')
+    time_str = now.strftime('%H%M')  # HHMM format (e.g., "0600", "1200", "1800")
     
-    # Save with date-based filename
-    dated_file = output_dir / f"{date_str}.json"
+    # Save with date-time-based filename
+    dated_file = output_dir / f"{date_str}-{time_str}.json"
     with open(dated_file, 'w') as f:
         json.dump(snapshot, f, indent=2)
     log(f"💾 Saved snapshot to {dated_file}")
@@ -407,6 +409,7 @@ def save_snapshot(snapshot: Dict, output_dir: Path):
     log(f"💾 Saved snapshot to {latest_file}")
     
     return dated_file, latest_file
+
 
 
 def main():
