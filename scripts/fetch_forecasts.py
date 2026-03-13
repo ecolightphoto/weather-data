@@ -52,8 +52,8 @@ def fetch_json(url: str, timeout: int = 30) -> Optional[Dict]:
         return None
 
 
-def fetch_nws_forecast(latitude: float, longitude: float) -> Optional[List[Dict]]:
-    """Fetch NWS daily forecast."""
+def fetch_nws_forecast(latitude: float, longitude: float) -> Optional[tuple[List[Dict], Dict]]:
+    """Fetch NWS daily forecast and metadata."""
     log("📡 Fetching NWS forecast...")
     
     # Step 1: Get forecast URL from points endpoint
@@ -76,13 +76,24 @@ def fetch_nws_forecast(latitude: float, longitude: float) -> Optional[List[Dict]
         log("❌ Failed to get NWS forecast data")
         return None
     
-    periods = forecast_data['properties'].get('periods', [])
-    log(f"✅ Fetched {len(periods)} NWS forecast periods")
+    properties = forecast_data['properties']
+    periods = properties.get('periods', [])
     
-    return periods
+    # Extract metadata about when forecast was updated
+    metadata = {
+        'updated': properties.get('updated'),
+        'generatedAt': properties.get('generatedAt'),
+        'updateTime': properties.get('updateTime')
+    }
+    
+    log(f"✅ Fetched {len(periods)} NWS forecast periods")
+    if metadata.get('updated'):
+        log(f"   Last updated: {metadata['updated']}")
+    
+    return periods, metadata
 
 
-def fetch_weather_underground_forecast(latitude: float, longitude: float) -> Optional[List[Dict]]:
+def fetch_weather_underground_forecast(latitude: float, longitude: float) -> Optional[tuple[List[Dict], Dict]]:
     """
     Fetch Weather Underground forecast via Weather.com v3 API.
     Uses PWS-compatible API key.
@@ -93,7 +104,10 @@ def fetch_weather_underground_forecast(latitude: float, longitude: float) -> Opt
     api_key = os.getenv('WU_API_KEY')
     if not api_key:
         log("⚠️  WU_API_KEY not found in environment - skipping WU forecast")
-        return []
+        return [], {}
+    
+    # Save the fetch time
+    fetch_time = datetime.now(timezone.utc).isoformat()
     
     # Weather Underground v3 daily forecast API (5-day forecast)
     params = {
@@ -109,7 +123,13 @@ def fetch_weather_underground_forecast(latitude: float, longitude: float) -> Opt
     
     if not data:
         log("❌ Failed to get Weather Underground forecast data")
-        return []
+        return [], {}
+    
+    # Metadata - WU doesn't provide explicit update time, so we use fetch time
+    metadata = {
+        'fetched_at': fetch_time,
+        'note': 'Weather Underground does not provide explicit forecast issue time'
+    }
     
     # Convert WU v3 format to ForecastPeriod-like format
     periods = []
@@ -181,14 +201,15 @@ def fetch_weather_underground_forecast(latitude: float, longitude: float) -> Opt
                 })
         
         log(f"✅ Fetched {len(periods)} Weather Underground forecast periods")
-        return periods
+        log(f"   Fetched at: {fetch_time}")
+        return periods, metadata
         
     except (KeyError, IndexError, TypeError) as e:
         log(f"❌ Error parsing WU data: {e}")
-        return []
+        return [], {}
 
 
-def fetch_ecmwf_forecast(latitude: float, longitude: float) -> Optional[List[Dict]]:
+def fetch_ecmwf_forecast(latitude: float, longitude: float) -> Optional[tuple[List[Dict], Dict]]:
     """Fetch ECMWF forecast via Open-Meteo."""
     log("📡 Fetching ECMWF forecast via Open-Meteo...")
     
@@ -211,6 +232,27 @@ def fetch_ecmwf_forecast(latitude: float, longitude: float) -> Optional[List[Dic
     if not data or 'daily' not in data:
         log("❌ Failed to get ECMWF forecast data")
         return None
+    
+    # Extract metadata
+    metadata = {
+        'generationtime_ms': data.get('generationtime_ms'),
+        'utc_offset_seconds': data.get('utc_offset_seconds'),
+        'model': 'ecmwf_ifs025'
+    }
+    
+    # Determine which ECMWF run this is based on current UTC time
+    now_utc = datetime.now(timezone.utc)
+    hour = now_utc.hour
+    
+    # ECMWF runs at 00:00 and 12:00 UTC
+    if hour < 12:
+        # Morning fetch - using previous night's 00:00 run
+        model_run = now_utc.replace(hour=0, minute=0, second=0, microsecond=0)
+    else:
+        # Afternoon/evening fetch - using today's 12:00 run
+        model_run = now_utc.replace(hour=12, minute=0, second=0, microsecond=0)
+    
+    metadata['model_run_time'] = model_run.isoformat()
     
     # Convert Open-Meteo format to ForecastPeriod-like format
     daily = data['daily']
@@ -259,7 +301,9 @@ def fetch_ecmwf_forecast(latitude: float, longitude: float) -> Optional[List[Dic
         periods.append(night_period)
     
     log(f"✅ Fetched {len(periods)} ECMWF forecast periods")
-    return periods
+    log(f"   Model run: {metadata['model_run_time']}")
+    
+    return periods, metadata
 
 
 def format_day_name(date_str: str, is_daytime: bool) -> str:
@@ -347,15 +391,16 @@ def create_snapshot(
     longitude: float,
     nws_periods: List[Dict],
     wu_periods: List[Dict],
-    ecmwf_periods: List[Dict]
+    ecmwf_periods: List[Dict],
+    nws_metadata: Dict = None,
+    wu_metadata: Dict = None,
+    ecmwf_metadata: Dict = None
 ) -> Dict:
     """Create forecast snapshot JSON structure."""
     
     now = datetime.now(timezone.utc)
-    # Convert to EST (UTC-5)
-    est_offset = -5 * 3600
-    now_est = datetime.fromtimestamp(now.timestamp() + est_offset)
-    timestamp = now_est.isoformat()
+    # Use UTC timestamp with 'Z' suffix for clarity
+    timestamp = now.isoformat(timespec='microseconds').replace('+00:00', 'Z')
     
     snapshot = {
         'timestamp': timestamp,
@@ -368,21 +413,23 @@ def create_snapshot(
         'forecasts': {
             'nws': {
                 'source': 'National Weather Service',
-                'periods': nws_periods or []
+                'periods': nws_periods or [],
+                'metadata': nws_metadata or {}
             },
             'weatherUnderground': {
                 'source': 'Weather Underground',
-                'periods': wu_periods or []
+                'periods': wu_periods or [],
+                'metadata': wu_metadata or {}
             },
             'ecmwf': {
                 'source': 'ECMWF via Open-Meteo',
-                'periods': ecmwf_periods or []
+                'periods': ecmwf_periods or [],
+                'metadata': ecmwf_metadata or {}
             }
         }
     }
     
     return snapshot
-
 
 
 def save_snapshot(snapshot: Dict, output_dir: Path):
@@ -396,11 +443,17 @@ def save_snapshot(snapshot: Dict, output_dir: Path):
     date_str = now.strftime('%Y-%m-%d')
     time_str = now.strftime('%H%M')  # HHMM format (e.g., "0600", "1200", "1800")
     
-    # Save with date-time-based filename
+    # Save with date-time-based filename (keeps all snapshots)
     dated_file = output_dir / f"{date_str}-{time_str}.json"
     with open(dated_file, 'w') as f:
         json.dump(snapshot, f, indent=2)
     log(f"💾 Saved snapshot to {dated_file}")
+    
+    # Save with date-only filename (overwrites previous snapshots from same day for easy navigation)
+    daily_file = output_dir / f"{date_str}.json"
+    with open(daily_file, 'w') as f:
+        json.dump(snapshot, f, indent=2)
+    log(f"💾 Saved snapshot to {daily_file}")
     
     # Also save as latest.json
     latest_file = output_dir / "latest.json"
@@ -408,7 +461,7 @@ def save_snapshot(snapshot: Dict, output_dir: Path):
         json.dump(snapshot, f, indent=2)
     log(f"💾 Saved snapshot to {latest_file}")
     
-    return dated_file, latest_file
+    return dated_file, daily_file, latest_file
 
 
 
@@ -428,9 +481,14 @@ def main():
     log(f"📁 Output directory: {output_dir}")
     
     # Fetch forecasts from all sources
-    nws_periods = fetch_nws_forecast(latitude, longitude)
-    wu_periods = fetch_weather_underground_forecast(latitude, longitude)
-    ecmwf_periods = fetch_ecmwf_forecast(latitude, longitude)
+    nws_result = fetch_nws_forecast(latitude, longitude)
+    nws_periods, nws_metadata = (nws_result if nws_result else (None, {}))
+    
+    wu_result = fetch_weather_underground_forecast(latitude, longitude)
+    wu_periods, wu_metadata = (wu_result if wu_result else ([], {}))
+    
+    ecmwf_result = fetch_ecmwf_forecast(latitude, longitude)
+    ecmwf_periods, ecmwf_metadata = (ecmwf_result if ecmwf_result else (None, {}))
     
     # Check if we got at least one successful forecast
     if not nws_periods and not wu_periods and not ecmwf_periods:
@@ -445,19 +503,28 @@ def main():
         longitude=longitude,
         nws_periods=nws_periods,
         wu_periods=wu_periods,
-        ecmwf_periods=ecmwf_periods
+        ecmwf_periods=ecmwf_periods,
+        nws_metadata=nws_metadata,
+        wu_metadata=wu_metadata,
+        ecmwf_metadata=ecmwf_metadata
     )
     
     # Save snapshot
-    dated_file, latest_file = save_snapshot(snapshot, output_dir)
+    dated_file, daily_file, latest_file = save_snapshot(snapshot, output_dir)
     
     # Summary
     log("=" * 60)
     log("📊 Snapshot Summary:")
     log(f"   NWS periods: {len(nws_periods) if nws_periods else 0}")
+    if nws_metadata.get('updated'):
+        log(f"   NWS updated: {nws_metadata['updated']}")
     log(f"   WU periods: {len(wu_periods) if wu_periods else 0}")
+    if wu_metadata.get('fetched_at'):
+        log(f"   WU fetched: {wu_metadata['fetched_at']}")
     log(f"   ECMWF periods: {len(ecmwf_periods) if ecmwf_periods else 0}")
-    log(f"   Files created: {dated_file.name}, {latest_file.name}")
+    if ecmwf_metadata.get('model_run_time'):
+        log(f"   ECMWF model run: {ecmwf_metadata['model_run_time']}")
+    log(f"   Files created: {dated_file.name}, {daily_file.name}, {latest_file.name}")
     log("=" * 60)
     log("✅ Forecast snapshot collection complete")
 
