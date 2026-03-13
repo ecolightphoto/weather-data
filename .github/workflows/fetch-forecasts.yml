@@ -1,0 +1,110 @@
+name: Fetch Daily Forecasts
+
+on:
+  # Run daily at 6:00 AM EST (11:00 UTC)
+  schedule:
+    - cron: '0 11 * * *'
+  
+  # Allow manual triggering for testing
+  workflow_dispatch:
+    inputs:
+      station_id:
+        description: 'Station ID (optional override)'
+        required: false
+        type: string
+      station_lat:
+        description: 'Station Latitude (optional override)'
+        required: false
+        type: string
+      station_lon:
+        description: 'Station Longitude (optional override)'
+        required: false
+        type: string
+
+jobs:
+  fetch-forecasts:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Display configuration
+        run: |
+          echo "🌍 Forecast Collection Configuration"
+          echo "======================================"
+          echo "Station ID: ${{ secrets.STATION_ID || 'DEFAULT_STATION' }}"
+          echo "Station Name: ${{ secrets.STATION_NAME || 'Default Station' }}"
+          echo "Latitude: ${{ secrets.STATION_LAT || '42.7325' }}"
+          echo "Longitude: ${{ secrets.STATION_LON || '-84.5555' }}"
+          echo "Trigger: ${{ github.event_name }}"
+          echo "======================================"
+      
+      - name: Run forecast collection script
+        env:
+          STATION_ID: ${{ inputs.station_id || secrets.STATION_ID || 'DEFAULT_STATION' }}
+          STATION_NAME: ${{ secrets.STATION_NAME || 'Default Station' }}
+          STATION_LAT: ${{ inputs.station_lat || secrets.STATION_LAT || '42.7325' }}
+          STATION_LON: ${{ inputs.station_lon || secrets.STATION_LON || '-84.5555' }}
+          OUTPUT_DIR: snapshots
+        run: |
+          python scripts/fetch_forecasts.py
+      
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "✅ New snapshot files detected"
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "⚠️  No changes detected"
+          fi
+      
+      - name: Commit and push snapshots
+        if: steps.check_changes.outputs.changes == 'true'
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "actions@github.com"
+          
+          DATE=$(date +%Y-%m-%d)
+          
+          git add snapshots/
+          git commit -m "📸 Add forecast snapshot for $DATE"
+          git push
+      
+      - name: Upload artifact (for debugging)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: forecast-snapshots
+          path: snapshots/
+          retention-days: 7
+      
+      - name: Summary
+        if: always()
+        run: |
+          echo "## 📊 Forecast Snapshot Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Date:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ -f snapshots/latest.json ]; then
+            echo "**Latest Snapshot:**" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            head -20 snapshots/latest.json >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Available Snapshots:**" >> $GITHUB_STEP_SUMMARY
+            ls -1 snapshots/*.json | wc -l | xargs -I {} echo "- {} snapshot files" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "⚠️ No snapshot file created" >> $GITHUB_STEP_SUMMARY
+          fi
