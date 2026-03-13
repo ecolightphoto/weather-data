@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-13T12:33:02.167430",
+  "timestamp": "2026-03-13T18:21:42.528710Z",
   "station": {
     "id": "KAZFLAGS516",
     "name": "Home Station",
@@ -276,7 +276,12 @@
           "shortForecast": "Clear",
           "detailedForecast": "Clear, with a low around 44. Northwest wind 2 to 6 mph."
         }
-      ]
+      ],
+      "metadata": {
+        "updated": null,
+        "generatedAt": "2026-03-13T17:33:01+00:00",
+        "updateTime": "2026-03-13T16:14:36+00:00"
+      }
     },
     "weatherUnderground": {
       "source": "Weather Underground",
@@ -286,10 +291,10 @@
           "name": "Friday",
           "temperature": 68,
           "temperatureUnit": "F",
-          "windSpeed": "9 mph",
+          "windSpeed": "8 mph",
           "windDirection": "SSW",
           "shortForecast": "Sunny",
-          "detailedForecast": "Sunny. Highs in the upper 60s and lows in the mid 30s.",
+          "detailedForecast": "Sunshine. Highs in the upper 60s and lows in the mid 30s.",
           "icon": "",
           "startTime": "2026-03-13T07:00:00-0700",
           "probabilityOfPrecipitation": {
@@ -307,7 +312,7 @@
           "windSpeed": "4 mph",
           "windDirection": "W",
           "shortForecast": "Partly Cloudy",
-          "detailedForecast": "Sunny. Highs in the upper 60s and lows in the mid 30s.",
+          "detailedForecast": "Sunshine. Highs in the upper 60s and lows in the mid 30s.",
           "icon": "",
           "startTime": "2026-03-13T07:00:00-0700",
           "probabilityOfPrecipitation": {
@@ -324,8 +329,8 @@
           "temperatureUnit": "F",
           "windSpeed": "19 mph",
           "windDirection": "WSW",
-          "shortForecast": "Partly Cloudy",
-          "detailedForecast": "Mix of sun and clouds. Highs in the mid 60s and lows in the upper 30s.",
+          "shortForecast": "Mostly Sunny",
+          "detailedForecast": "Mostly sunny. Highs in the mid 60s and lows in the upper 30s.",
           "icon": "",
           "startTime": "2026-03-14T07:00:00-0700",
           "probabilityOfPrecipitation": {
@@ -338,19 +343,19 @@
         {
           "number": 4,
           "name": "Tomorrow night",
-          "temperature": 39,
+          "temperature": 38,
           "temperatureUnit": "F",
           "windSpeed": "13 mph",
           "windDirection": "W",
           "shortForecast": "Clear",
-          "detailedForecast": "Mix of sun and clouds. Highs in the mid 60s and lows in the upper 30s.",
+          "detailedForecast": "Mostly sunny. Highs in the mid 60s and lows in the upper 30s.",
           "icon": "",
           "startTime": "2026-03-14T07:00:00-0700",
           "probabilityOfPrecipitation": {
             "value": 0
           },
           "relativeHumidity": {
-            "value": 35
+            "value": 36
           }
         },
         {
@@ -374,9 +379,9 @@
         {
           "number": 6,
           "name": "Sunday night",
-          "temperature": 32,
+          "temperature": 31,
           "temperatureUnit": "F",
-          "windSpeed": "5 mph",
+          "windSpeed": "6 mph",
           "windDirection": "NNE",
           "shortForecast": "Partly Cloudy",
           "detailedForecast": "Partly cloudy. Highs in the mid 60s and lows in the low 30s.",
@@ -397,7 +402,7 @@
           "windSpeed": "9 mph",
           "windDirection": "NE",
           "shortForecast": "Partly Cloudy",
-          "detailedForecast": "Times of sun and clouds. Highs in the mid 60s and lows in the mid 30s.",
+          "detailedForecast": "Mix of sun and clouds. Highs in the mid 60s and lows in the mid 30s.",
           "icon": "",
           "startTime": "2026-03-16T07:00:00-0700",
           "probabilityOfPrecipitation": {
@@ -414,15 +419,15 @@
           "temperatureUnit": "F",
           "windSpeed": "4 mph",
           "windDirection": "NNE",
-          "shortForecast": "Partly Cloudy",
-          "detailedForecast": "Times of sun and clouds. Highs in the mid 60s and lows in the mid 30s.",
+          "shortForecast": "Mostly Clear",
+          "detailedForecast": "Mix of sun and clouds. Highs in the mid 60s and lows in the mid 30s.",
           "icon": "",
           "startTime": "2026-03-16T07:00:00-0700",
           "probabilityOfPrecipitation": {
             "value": 0
           },
           "relativeHumidity": {
-            "value": 47
+            "value": 49
           }
         },
         {
@@ -430,17 +435,17 @@
           "name": "Tuesday",
           "temperature": 73,
           "temperatureUnit": "F",
-          "windSpeed": "9 mph",
+          "windSpeed": "8 mph",
           "windDirection": "ENE",
-          "shortForecast": "Mostly Sunny",
-          "detailedForecast": "Plenty of sun. Highs in the low 70s and lows in the upper 30s.",
+          "shortForecast": "Partly Cloudy",
+          "detailedForecast": "Mix of sun and clouds. Highs in the low 70s and lows in the upper 30s.",
           "icon": "",
           "startTime": "2026-03-17T07:00:00-0700",
           "probabilityOfPrecipitation": {
             "value": 0
           },
           "relativeHumidity": {
-            "value": 26
+            "value": 27
           }
         },
         {
@@ -451,11 +456,11 @@
           "windSpeed": "3 mph",
           "windDirection": "NNE",
           "shortForecast": "Clear",
-          "detailedForecast": "Plenty of sun. Highs in the low 70s and lows in the upper 30s.",
+          "detailedForecast": "Mix of sun and clouds. Highs in the low 70s and lows in the upper 30s.",
           "icon": "",
           "startTime": "2026-03-17T07:00:00-0700",
           "probabilityOfPrecipitation": {
-            "value": 1
+            "value": 0
           },
           "relativeHumidity": {
             "value": 43
@@ -464,10 +469,10 @@
         {
           "number": 11,
           "name": "Wednesday",
-          "temperature": 79,
+          "temperature": 78,
           "temperatureUnit": "F",
           "windSpeed": "7 mph",
-          "windDirection": "ESE",
+          "windDirection": "E",
           "shortForecast": "Sunny",
           "detailedForecast": "Sunshine. Highs in the upper 70s and lows in the low 40s.",
           "icon": "",
@@ -482,7 +487,7 @@
         {
           "number": 12,
           "name": "Wednesday night",
-          "temperature": 43,
+          "temperature": 42,
           "temperatureUnit": "F",
           "windSpeed": "3 mph",
           "windDirection": "N",
@@ -494,10 +499,14 @@
             "value": 0
           },
           "relativeHumidity": {
-            "value": 31
+            "value": 32
           }
         }
-      ]
+      ],
+      "metadata": {
+        "fetched_at": "2026-03-13T18:21:41.579200+00:00",
+        "note": "Weather Underground does not provide explicit forecast issue time"
+      }
     },
     "ecmwf": {
       "source": "ECMWF via Open-Meteo",
@@ -782,7 +791,13 @@
           "probabilityOfPrecipitation": null,
           "relativeHumidity": null
         }
-      ]
+      ],
+      "metadata": {
+        "generationtime_ms": 0.1615285873413086,
+        "utc_offset_seconds": -14400,
+        "model": "ecmwf_ifs025",
+        "model_run_time": "2026-03-13T12:00:00+00:00"
+      }
     }
   }
 }
