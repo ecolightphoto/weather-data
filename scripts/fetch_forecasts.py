@@ -275,7 +275,7 @@ def fetch_ecmwf_forecast(latitude: float, longitude: float) -> Optional[tuple[Li
             'startTime': f"{date}T12:00:00-05:00",
             'probabilityOfPrecipitation': {
                 'value': estimate_precip_probability(daily['precipitation_sum'][i])
-            } if daily['precipitation_sum'][i] > 0 else None,
+            },
             'relativeHumidity': None
         }
         
@@ -293,7 +293,7 @@ def fetch_ecmwf_forecast(latitude: float, longitude: float) -> Optional[tuple[Li
             'startTime': f"{date}T00:00:00-05:00",
             'probabilityOfPrecipitation': {
                 'value': estimate_precip_probability(daily['precipitation_sum'][i])
-            } if daily['precipitation_sum'][i] > 0 else None,
+            },
             'relativeHumidity': None
         }
         
