@@ -54,7 +54,7 @@ def fetch_json(url: str, timeout: int = 30) -> Optional[Dict]:
 
 def fetch_nws_forecast(latitude: float, longitude: float) -> Optional[tuple[List[Dict], Dict]]:
     """Fetch NWS daily forecast and metadata."""
-    log("📡 Fetching NWS forecast...")
+    log("📡 Fetching NWS daily forecast...")
     
     # Step 1: Get forecast URL from points endpoint
     points_url = f"https://api.weather.gov/points/{latitude},{longitude}"
@@ -86,7 +86,48 @@ def fetch_nws_forecast(latitude: float, longitude: float) -> Optional[tuple[List
         'updateTime': properties.get('updateTime')
     }
     
-    log(f"✅ Fetched {len(periods)} NWS forecast periods")
+    log(f"✅ Fetched {len(periods)} NWS daily forecast periods")
+    if metadata.get('updated'):
+        log(f"   Last updated: {metadata['updated']}")
+    
+    return periods, metadata
+
+
+def fetch_nws_hourly_forecast(latitude: float, longitude: float) -> Optional[tuple[List[Dict], Dict]]:
+    """Fetch NWS hourly forecast and metadata."""
+    log("📡 Fetching NWS hourly forecast...")
+    
+    # Step 1: Get forecast URL from points endpoint
+    points_url = f"https://api.weather.gov/points/{latitude},{longitude}"
+    points_data = fetch_json(points_url)
+    
+    if not points_data or 'properties' not in points_data:
+        log("❌ Failed to get NWS points data for hourly forecast")
+        return None
+    
+    forecast_hourly_url = points_data['properties'].get('forecastHourly')
+    if not forecast_hourly_url:
+        log("❌ No hourly forecast URL in NWS points response")
+        return None
+    
+    # Step 2: Fetch the actual hourly forecast
+    forecast_data = fetch_json(forecast_hourly_url)
+    
+    if not forecast_data or 'properties' not in forecast_data:
+        log("❌ Failed to get NWS hourly forecast data")
+        return None
+    
+    properties = forecast_data['properties']
+    periods = properties.get('periods', [])
+    
+    # Extract metadata about when forecast was updated
+    metadata = {
+        'updated': properties.get('updated'),
+        'generatedAt': properties.get('generatedAt'),
+        'updateTime': properties.get('updateTime')
+    }
+    
+    log(f"✅ Fetched {len(periods)} NWS hourly forecast periods")
     if metadata.get('updated'):
         log(f"   Last updated: {metadata['updated']}")
     
@@ -432,6 +473,40 @@ def create_snapshot(
     return snapshot
 
 
+def create_hourly_snapshot(
+    station_id: str,
+    station_name: str,
+    latitude: float,
+    longitude: float,
+    nws_hourly_periods: List[Dict],
+    nws_hourly_metadata: Dict = None
+) -> Dict:
+    """Create hourly forecast snapshot JSON structure (NWS only)."""
+    
+    now = datetime.now(timezone.utc)
+    # Use UTC timestamp with 'Z' suffix for clarity
+    timestamp = now.isoformat(timespec='microseconds').replace('+00:00', 'Z')
+    
+    snapshot = {
+        'timestamp': timestamp,
+        'station': {
+            'id': station_id,
+            'name': station_name,
+            'latitude': latitude,
+            'longitude': longitude
+        },
+        'forecasts': {
+            'nws': {
+                'source': 'National Weather Service - Hourly',
+                'periods': nws_hourly_periods or [],
+                'metadata': nws_hourly_metadata or {}
+            }
+        }
+    }
+    
+    return snapshot
+
+
 def save_snapshot(snapshot: Dict, output_dir: Path):
     """Save snapshot to JSON files."""
     
@@ -457,6 +532,31 @@ def save_snapshot(snapshot: Dict, output_dir: Path):
     return daily_file, latest_file
 
 
+def save_hourly_snapshot(snapshot: Dict, output_dir: Path):
+    """Save hourly snapshot to JSON files."""
+    
+    # Create output directory if it doesn't exist
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Get current date for filename
+    now = datetime.now()
+    date_str = now.strftime('%Y-%m-%d')
+    
+    # Save with date-only filename with -hourly suffix
+    hourly_file = output_dir / f"{date_str}-hourly.json"
+    with open(hourly_file, 'w') as f:
+        json.dump(snapshot, f, indent=2)
+    log(f"💾 Saved hourly snapshot to {hourly_file}")
+    
+    # Also save as latest-hourly.json
+    latest_hourly_file = output_dir / "latest-hourly.json"
+    with open(latest_hourly_file, 'w') as f:
+        json.dump(snapshot, f, indent=2)
+    log(f"💾 Saved hourly snapshot to {latest_hourly_file}")
+    
+    return hourly_file, latest_hourly_file
+
+
 
 def main():
     """Main execution function."""
@@ -473,7 +573,11 @@ def main():
     log(f"📍 Location: {latitude}, {longitude}")
     log(f"📁 Output directory: {output_dir}")
     
-    # Fetch forecasts from all sources
+    # Fetch daily forecasts from all sources
+    log("\n" + "=" * 60)
+    log("DAILY FORECASTS")
+    log("=" * 60)
+    
     nws_result = fetch_nws_forecast(latitude, longitude)
     nws_periods, nws_metadata = (nws_result if nws_result else (None, {}))
     
@@ -485,10 +589,10 @@ def main():
     
     # Check if we got at least one successful forecast
     if not nws_periods and not wu_periods and not ecmwf_periods:
-        log("❌ Failed to fetch any forecasts - aborting")
+        log("❌ Failed to fetch any daily forecasts - aborting")
         sys.exit(1)
     
-    # Create snapshot
+    # Create daily snapshot
     snapshot = create_snapshot(
         station_id=station_id,
         station_name=station_name,
@@ -502,12 +606,42 @@ def main():
         ecmwf_metadata=ecmwf_metadata
     )
     
-    # Save snapshot
+    # Save daily snapshot
     daily_file, latest_file = save_snapshot(snapshot, output_dir)
     
-    # Summary
+    # Fetch and save hourly forecasts
+    log("\n" + "=" * 60)
+    log("HOURLY FORECASTS")
     log("=" * 60)
+    
+    nws_hourly_result = fetch_nws_hourly_forecast(latitude, longitude)
+    
+    if nws_hourly_result:
+        nws_hourly_periods, nws_hourly_metadata = nws_hourly_result
+        log(f"✅ Successfully fetched hourly forecast")
+    else:
+        log("⚠️  Failed to fetch hourly forecast - creating empty snapshot")
+        nws_hourly_periods = []
+        nws_hourly_metadata = {'error': 'Failed to fetch hourly forecast'}
+    
+    # Create hourly snapshot (even if fetch failed, to indicate the attempt)
+    hourly_snapshot = create_hourly_snapshot(
+        station_id=station_id,
+        station_name=station_name,
+        latitude=latitude,
+        longitude=longitude,
+        nws_hourly_periods=nws_hourly_periods,
+        nws_hourly_metadata=nws_hourly_metadata
+    )
+    
+    # Save hourly snapshot
+    hourly_file, latest_hourly_file = save_hourly_snapshot(hourly_snapshot, output_dir)
+    
+    # Summary
+    log("\n" + "=" * 60)
     log("📊 Snapshot Summary:")
+    log("=" * 60)
+    log("DAILY FORECASTS:")
     log(f"   NWS periods: {len(nws_periods) if nws_periods else 0}")
     if nws_metadata.get('updated'):
         log(f"   NWS updated: {nws_metadata['updated']}")
@@ -518,6 +652,14 @@ def main():
     if ecmwf_metadata.get('model_run_time'):
         log(f"   ECMWF model run: {ecmwf_metadata['model_run_time']}")
     log(f"   Files created: {daily_file.name}, {latest_file.name}")
+    
+    log("\nHOURLY FORECASTS:")
+    log(f"   NWS hourly periods: {len(nws_hourly_periods)}")
+    if nws_hourly_metadata.get('updated'):
+        log(f"   NWS hourly updated: {nws_hourly_metadata['updated']}")
+    if nws_hourly_metadata.get('error'):
+        log(f"   ⚠️  Error: {nws_hourly_metadata['error']}")
+    log(f"   Files created: {hourly_file.name}, {latest_hourly_file.name}")
     log("=" * 60)
     log("✅ Forecast snapshot collection complete")
 
