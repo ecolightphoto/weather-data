@@ -93,6 +93,81 @@ def fetch_nws_forecast(latitude: float, longitude: float) -> Optional[tuple[List
     return periods, metadata
 
 
+def fetch_wu_hourly_observations(station_id: str) -> Optional[List[Dict]]:
+    """
+    Fetch hourly observations from Weather Underground PWS.
+    Returns observations from the last 24 hours for archival purposes.
+    """
+    log("📡 Fetching WU hourly observations for archival...")
+    
+    # Get API key from environment
+    api_key = os.getenv('WU_API_KEY')
+    if not api_key:
+        log("⚠️  WU_API_KEY not found in environment - skipping observations")
+        return []
+    
+    # Use the 1-day observations endpoint
+    params = {
+        'stationId': station_id,
+        'format': 'json',
+        'units': 'e',  # English/Imperial units
+        'apiKey': api_key
+    }
+    
+    url = f"https://api.weather.com/v2/pws/observations/all/1day?{urllib.parse.urlencode(params)}"
+    data = fetch_json(url)
+    
+    if not data or 'observations' not in data:
+        log("❌ Failed to get WU observations")
+        return []
+    
+    observations = data['observations']
+    log(f"✅ Fetched {len(observations)} WU observations")
+    
+    # Convert to simplified format for archival
+    hourly_obs = []
+    
+    for obs in observations:
+        obs_time_local = obs.get('obsTimeLocal')
+        imperial = obs.get('imperial')
+        
+        if not obs_time_local or not imperial:
+            continue
+        
+        # Convert local time to UTC ISO8601
+        try:
+            # Parse local time (format: "2026-03-15 05:00:00")
+            from datetime import datetime
+            local_dt = datetime.strptime(obs_time_local, "%Y-%m-%d %H:%M:%S")
+            
+            # For Arizona (MST = UTC-7, no DST)
+            # Adjust this offset based on your station's timezone
+            from datetime import timedelta
+            utc_dt = local_dt + timedelta(hours=7)  # Arizona MST to UTC
+            utc_dt = utc_dt.replace(tzinfo=timezone.utc)
+            
+            # Extract observation data
+            # Use tempAvg if temp is not available (for aggregated observations)
+            temp = imperial.get('temp')
+            if temp is None:
+                temp = imperial.get('tempAvg')
+            
+            hourly_obs.append({
+                'time': utc_dt.isoformat().replace('+00:00', 'Z'),
+                'temp': temp,
+                'precip': imperial.get('precipTotal'),
+                'humidity': obs.get('humidityAvg'),
+                'windSpeed': imperial.get('windspeedAvg')
+            })
+            
+        except Exception as e:
+            log(f"⚠️  Error parsing observation time '{obs_time_local}': {e}")
+            continue
+    
+    log(f"✅ Converted {len(hourly_obs)} observations to archive format")
+    return hourly_obs
+
+
 def fetch_nws_hourly_forecast(latitude: float, longitude: float) -> Optional[tuple[List[Dict], Dict]]:
     """Fetch NWS hourly forecast and metadata."""
     log("📡 Fetching NWS hourly forecast...")
@@ -479,9 +554,10 @@ def create_hourly_snapshot(
     latitude: float,
     longitude: float,
     nws_hourly_periods: List[Dict],
-    nws_hourly_metadata: Dict = None
+    nws_hourly_metadata: Dict = None,
+    observations: List[Dict] = None
 ) -> Dict:
-    """Create hourly forecast snapshot JSON structure (NWS only)."""
+    """Create hourly forecast snapshot JSON structure (NWS only) with optional observations."""
     
     now = datetime.now(timezone.utc)
     # Use UTC timestamp with 'Z' suffix for clarity
@@ -503,6 +579,16 @@ def create_hourly_snapshot(
             }
         }
     }
+    
+    # Add observations if available (for historical archival)
+    if observations:
+        snapshot['observations'] = {
+            'source': 'Weather Underground PWS',
+            'stationId': station_id,
+            'capturedAt': timestamp,
+            'hours': observations
+        }
+        log(f"✅ Added {len(observations)} cached observations to hourly snapshot")
     
     return snapshot
 
@@ -611,7 +697,7 @@ def main():
     
     # Fetch and save hourly forecasts
     log("\n" + "=" * 60)
-    log("HOURLY FORECASTS")
+    log("HOURLY FORECASTS & OBSERVATIONS")
     log("=" * 60)
     
     nws_hourly_result = fetch_nws_hourly_forecast(latitude, longitude)
@@ -624,14 +710,18 @@ def main():
         nws_hourly_periods = []
         nws_hourly_metadata = {'error': 'Failed to fetch hourly forecast'}
     
-    # Create hourly snapshot (even if fetch failed, to indicate the attempt)
+    # Fetch current observations for archival (NEW)
+    observations = fetch_wu_hourly_observations(station_id)
+    
+    # Create hourly snapshot with observations (even if fetch failed, to indicate the attempt)
     hourly_snapshot = create_hourly_snapshot(
         station_id=station_id,
         station_name=station_name,
         latitude=latitude,
         longitude=longitude,
         nws_hourly_periods=nws_hourly_periods,
-        nws_hourly_metadata=nws_hourly_metadata
+        nws_hourly_metadata=nws_hourly_metadata,
+        observations=observations  # NEW - include observations for archival
     )
     
     # Save hourly snapshot
@@ -659,6 +749,9 @@ def main():
         log(f"   NWS hourly updated: {nws_hourly_metadata['updated']}")
     if nws_hourly_metadata.get('error'):
         log(f"   ⚠️  Error: {nws_hourly_metadata['error']}")
+    log(f"   Cached observations: {len(observations) if observations else 0}")
+    if observations:
+        log(f"   ✅ Observations archived for historical comparison")
     log(f"   Files created: {hourly_file.name}, {latest_hourly_file.name}")
     log("=" * 60)
     log("✅ Forecast snapshot collection complete")
