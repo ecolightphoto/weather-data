@@ -337,7 +337,7 @@ def fetch_ecmwf_forecast(latitude: float, longitude: float) -> Optional[tuple[Li
         'temperature_unit': 'fahrenheit',
         'windspeed_unit': 'mph',
         'precipitation_unit': 'inch',
-        'timezone': 'America/New_York',
+        'timezone': 'America/Phoenix',  # Fixed: Use Arizona timezone (MST, no DST)
         'forecast_days': '10',
         'models': 'ecmwf_ifs025'
     }
@@ -388,7 +388,7 @@ def fetch_ecmwf_forecast(latitude: float, longitude: float) -> Optional[tuple[Li
             'shortForecast': interpret_weather_code(daily['weathercode'][i], True),
             'detailedForecast': interpret_weather_code(daily['weathercode'][i], True),
             'icon': '',
-            'startTime': f"{date}T12:00:00-05:00",
+            'startTime': f"{date}T12:00:00-07:00",  # Arizona MST (UTC-7, no DST)
             'probabilityOfPrecipitation': {
                 'value': estimate_precip_probability(daily['precipitation_sum'][i])
             },
@@ -406,7 +406,7 @@ def fetch_ecmwf_forecast(latitude: float, longitude: float) -> Optional[tuple[Li
             'shortForecast': interpret_weather_code(daily['weathercode'][i], False),
             'detailedForecast': interpret_weather_code(daily['weathercode'][i], False),
             'icon': '',
-            'startTime': f"{date}T00:00:00-05:00",
+            'startTime': f"{date}T00:00:00-07:00",  # Arizona MST (UTC-7, no DST)
             'probabilityOfPrecipitation': {
                 'value': estimate_precip_probability(daily['precipitation_sum'][i])
             },
