@@ -1,0 +1,529 @@
+{
+  "timestamp": "2026-03-20T13:03:02.376500Z",
+  "station": {
+    "id": "KAZFLAGS516",
+    "name": "Home Station",
+    "latitude": 35.236462,
+    "longitude": -111.66571
+  },
+  "forecasts": {
+    "nws": {
+      "source": "National Weather Service - Hourly",
+      "periods": [],
+      "metadata": {
+        "error": "Failed to fetch hourly forecast"
+      }
+    }
+  },
+  "observations": {
+    "source": "Weather Underground PWS",
+    "stationId": "KAZFLAGS516",
+    "capturedAt": "2026-03-20T13:03:02.376500Z",
+    "hours": [
+      {
+        "time": "2026-03-20T07:04:00Z",
+        "temp": 40,
+        "precip": 0.0,
+        "humidity": 40,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T07:09:00Z",
+        "temp": 40,
+        "precip": 0.0,
+        "humidity": 40,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T07:14:00Z",
+        "temp": 39,
+        "precip": 0.0,
+        "humidity": 41,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T07:19:00Z",
+        "temp": 39,
+        "precip": 0.0,
+        "humidity": 41,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T07:24:00Z",
+        "temp": 39,
+        "precip": 0.0,
+        "humidity": 41,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T07:29:00Z",
+        "temp": 39,
+        "precip": 0.0,
+        "humidity": 42,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T07:34:00Z",
+        "temp": 39,
+        "precip": 0.0,
+        "humidity": 42,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T07:39:00Z",
+        "temp": 39,
+        "precip": 0.0,
+        "humidity": 42,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T07:44:00Z",
+        "temp": 39,
+        "precip": 0.0,
+        "humidity": 42,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T07:49:00Z",
+        "temp": 39,
+        "precip": 0.0,
+        "humidity": 42,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T07:54:00Z",
+        "temp": 38,
+        "precip": 0.0,
+        "humidity": 42,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T07:59:00Z",
+        "temp": 38,
+        "precip": 0.0,
+        "humidity": 43,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T08:04:00Z",
+        "temp": 38,
+        "precip": 0.0,
+        "humidity": 42,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T08:09:00Z",
+        "temp": 38,
+        "precip": 0.0,
+        "humidity": 42,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T08:14:00Z",
+        "temp": 38,
+        "precip": 0.0,
+        "humidity": 42,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T08:19:00Z",
+        "temp": 38,
+        "precip": 0.0,
+        "humidity": 43,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T08:24:00Z",
+        "temp": 38,
+        "precip": 0.0,
+        "humidity": 43,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T08:29:00Z",
+        "temp": 38,
+        "precip": 0.0,
+        "humidity": 43,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T08:34:00Z",
+        "temp": 38,
+        "precip": 0.0,
+        "humidity": 43,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T08:39:00Z",
+        "temp": 38,
+        "precip": 0.0,
+        "humidity": 42,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T08:44:00Z",
+        "temp": 38,
+        "precip": 0.0,
+        "humidity": 42,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T08:49:00Z",
+        "temp": 38,
+        "precip": 0.0,
+        "humidity": 43,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T08:54:00Z",
+        "temp": 37,
+        "precip": 0.0,
+        "humidity": 45,
+        "windSpeed": 1
+      },
+      {
+        "time": "2026-03-20T08:59:00Z",
+        "temp": 37,
+        "precip": 0.0,
+        "humidity": 45,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T09:04:00Z",
+        "temp": 37,
+        "precip": 0.0,
+        "humidity": 44,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T09:09:00Z",
+        "temp": 37,
+        "precip": 0.0,
+        "humidity": 44,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T09:14:00Z",
+        "temp": 36,
+        "precip": 0.0,
+        "humidity": 46,
+        "windSpeed": 1
+      },
+      {
+        "time": "2026-03-20T09:19:00Z",
+        "temp": 36,
+        "precip": 0.0,
+        "humidity": 46,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T09:24:00Z",
+        "temp": 36,
+        "precip": 0.0,
+        "humidity": 46,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T09:29:00Z",
+        "temp": 36,
+        "precip": 0.0,
+        "humidity": 46,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T09:34:00Z",
+        "temp": 36,
+        "precip": 0.0,
+        "humidity": 46,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T09:39:00Z",
+        "temp": 35,
+        "precip": 0.0,
+        "humidity": 47,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T09:44:00Z",
+        "temp": 35,
+        "precip": 0.0,
+        "humidity": 48,
+        "windSpeed": 1
+      },
+      {
+        "time": "2026-03-20T09:49:00Z",
+        "temp": 35,
+        "precip": 0.0,
+        "humidity": 48,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T09:54:00Z",
+        "temp": 35,
+        "precip": 0.0,
+        "humidity": 48,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T09:59:00Z",
+        "temp": 35,
+        "precip": 0.0,
+        "humidity": 47,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T10:04:00Z",
+        "temp": 35,
+        "precip": 0.0,
+        "humidity": 47,
+        "windSpeed": 1
+      },
+      {
+        "time": "2026-03-20T10:09:00Z",
+        "temp": 35,
+        "precip": 0.0,
+        "humidity": 49,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T10:14:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 49,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T10:19:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 49,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T10:24:00Z",
+        "temp": 35,
+        "precip": 0.0,
+        "humidity": 49,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T10:29:00Z",
+        "temp": 35,
+        "precip": 0.0,
+        "humidity": 49,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T10:34:00Z",
+        "temp": 35,
+        "precip": 0.0,
+        "humidity": 49,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T10:39:00Z",
+        "temp": 35,
+        "precip": 0.0,
+        "humidity": 49,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T10:44:00Z",
+        "temp": 35,
+        "precip": 0.0,
+        "humidity": 49,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T10:49:00Z",
+        "temp": 35,
+        "precip": 0.0,
+        "humidity": 49,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T10:54:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 49,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T10:59:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 50,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T11:04:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 49,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T11:09:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 49,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T11:14:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 49,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T11:19:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 49,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T11:24:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 50,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T11:29:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 50,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T11:33:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 50,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T11:39:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 50,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T11:44:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 50,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T11:49:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 51,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T11:54:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 51,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T11:59:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 51,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T12:04:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 50,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T12:09:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 50,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T12:14:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 50,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T12:19:00Z",
+        "temp": 34,
+        "precip": 0.0,
+        "humidity": 51,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T12:24:00Z",
+        "temp": 33,
+        "precip": 0.0,
+        "humidity": 52,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T12:29:00Z",
+        "temp": 33,
+        "precip": 0.0,
+        "humidity": 52,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T12:34:00Z",
+        "temp": 33,
+        "precip": 0.0,
+        "humidity": 52,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T12:39:00Z",
+        "temp": 33,
+        "precip": 0.0,
+        "humidity": 52,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T12:44:00Z",
+        "temp": 33,
+        "precip": 0.0,
+        "humidity": 52,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T12:49:00Z",
+        "temp": 33,
+        "precip": 0.0,
+        "humidity": 53,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-03-20T12:54:00Z",
+        "temp": 33,
+        "precip": 0.0,
+        "humidity": 53,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-03-20T12:59:00Z",
+        "temp": 33,
+        "precip": 0.0,
+        "humidity": 53,
+        "windSpeed": 3
+      }
+    ]
+  }
+}

@@ -1,0 +1,843 @@
+{
+  "timestamp": "2026-03-17T13:14:59.532757Z",
+  "station": {
+    "id": "KAZFLAGS516",
+    "name": "Home Station",
+    "latitude": 35.236462,
+    "longitude": -111.66571
+  },
+  "forecasts": {
+    "nws": {
+      "source": "National Weather Service",
+      "periods": [
+        {
+          "number": 1,
+          "name": "Today",
+          "startTime": "2026-03-17T06:00:00-07:00",
+          "endTime": "2026-03-17T18:00:00-07:00",
+          "isDaytime": true,
+          "temperature": 70,
+          "temperatureUnit": "F",
+          "temperatureTrend": null,
+          "probabilityOfPrecipitation": {
+            "unitCode": "wmoUnit:percent",
+            "value": 0
+          },
+          "windSpeed": "3 to 9 mph",
+          "windDirection": "NE",
+          "icon": "https://api.weather.gov/icons/land/day/few?size=medium",
+          "shortForecast": "Sunny",
+          "detailedForecast": "Sunny. High near 70, with temperatures falling to around 67 in the afternoon. Northeast wind 3 to 9 mph, with gusts as high as 17 mph."
+        },
+        {
+          "number": 2,
+          "name": "Tonight",
+          "startTime": "2026-03-17T18:00:00-07:00",
+          "endTime": "2026-03-18T06:00:00-07:00",
+          "isDaytime": false,
+          "temperature": 35,
+          "temperatureUnit": "F",
+          "temperatureTrend": null,
+          "probabilityOfPrecipitation": {
+            "unitCode": "wmoUnit:percent",
+            "value": 0
+          },
+          "windSpeed": "2 to 6 mph",
+          "windDirection": "NE",
+          "icon": "https://api.weather.gov/icons/land/night/few?size=medium",
+          "shortForecast": "Mostly Clear",
+          "detailedForecast": "Mostly clear, with a low around 35. Northeast wind 2 to 6 mph."
+        },
+        {
+          "number": 3,
+          "name": "Wednesday",
+          "startTime": "2026-03-18T06:00:00-07:00",
+          "endTime": "2026-03-18T18:00:00-07:00",
+          "isDaytime": true,
+          "temperature": 77,
+          "temperatureUnit": "F",
+          "temperatureTrend": null,
+          "probabilityOfPrecipitation": {
+            "unitCode": "wmoUnit:percent",
+            "value": 0
+          },
+          "windSpeed": "2 to 7 mph",
+          "windDirection": "E",
+          "icon": "https://api.weather.gov/icons/land/day/skc?size=medium",
+          "shortForecast": "Sunny",
+          "detailedForecast": "Sunny, with a high near 77. East wind 2 to 7 mph."
+        },
+        {
+          "number": 4,
+          "name": "Wednesday Night",
+          "startTime": "2026-03-18T18:00:00-07:00",
+          "endTime": "2026-03-19T06:00:00-07:00",
+          "isDaytime": false,
+          "temperature": 40,
+          "temperatureUnit": "F",
+          "temperatureTrend": null,
+          "probabilityOfPrecipitation": {
+            "unitCode": "wmoUnit:percent",
+            "value": 0
+          },
+          "windSpeed": "5 mph",
+          "windDirection": "N",
+          "icon": "https://api.weather.gov/icons/land/night/few?size=medium",
+          "shortForecast": "Mostly Clear",
+          "detailedForecast": "Mostly clear, with a low around 40. North wind around 5 mph."
+        },
+        {
+          "number": 5,
+          "name": "Thursday",
+          "startTime": "2026-03-19T06:00:00-07:00",
+          "endTime": "2026-03-19T18:00:00-07:00",
+          "isDaytime": true,
+          "temperature": 81,
+          "temperatureUnit": "F",
+          "temperatureTrend": null,
+          "probabilityOfPrecipitation": {
+            "unitCode": "wmoUnit:percent",
+            "value": 0
+          },
+          "windSpeed": "2 to 7 mph",
+          "windDirection": "E",
+          "icon": "https://api.weather.gov/icons/land/day/skc?size=medium",
+          "shortForecast": "Sunny",
+          "detailedForecast": "Sunny, with a high near 81. East wind 2 to 7 mph."
+        },
+        {
+          "number": 6,
+          "name": "Thursday Night",
+          "startTime": "2026-03-19T18:00:00-07:00",
+          "endTime": "2026-03-20T06:00:00-07:00",
+          "isDaytime": false,
+          "temperature": 43,
+          "temperatureUnit": "F",
+          "temperatureTrend": null,
+          "probabilityOfPrecipitation": {
+            "unitCode": "wmoUnit:percent",
+            "value": 0
+          },
+          "windSpeed": "5 mph",
+          "windDirection": "N",
+          "icon": "https://api.weather.gov/icons/land/night/skc?size=medium",
+          "shortForecast": "Clear",
+          "detailedForecast": "Clear, with a low around 43. North wind around 5 mph."
+        },
+        {
+          "number": 7,
+          "name": "Friday",
+          "startTime": "2026-03-20T06:00:00-07:00",
+          "endTime": "2026-03-20T18:00:00-07:00",
+          "isDaytime": true,
+          "temperature": 82,
+          "temperatureUnit": "F",
+          "temperatureTrend": null,
+          "probabilityOfPrecipitation": {
+            "unitCode": "wmoUnit:percent",
+            "value": 0
+          },
+          "windSpeed": "2 to 8 mph",
+          "windDirection": "W",
+          "icon": "https://api.weather.gov/icons/land/day/skc?size=medium",
+          "shortForecast": "Sunny",
+          "detailedForecast": "Sunny, with a high near 82. West wind 2 to 8 mph, with gusts as high as 17 mph."
+        },
+        {
+          "number": 8,
+          "name": "Friday Night",
+          "startTime": "2026-03-20T18:00:00-07:00",
+          "endTime": "2026-03-21T06:00:00-07:00",
+          "isDaytime": false,
+          "temperature": 43,
+          "temperatureUnit": "F",
+          "temperatureTrend": null,
+          "probabilityOfPrecipitation": {
+            "unitCode": "wmoUnit:percent",
+            "value": 0
+          },
+          "windSpeed": "3 to 7 mph",
+          "windDirection": "W",
+          "icon": "https://api.weather.gov/icons/land/night/skc?size=medium",
+          "shortForecast": "Clear",
+          "detailedForecast": "Clear, with a low around 43. West wind 3 to 7 mph."
+        },
+        {
+          "number": 9,
+          "name": "Saturday",
+          "startTime": "2026-03-21T06:00:00-07:00",
+          "endTime": "2026-03-21T18:00:00-07:00",
+          "isDaytime": true,
+          "temperature": 80,
+          "temperatureUnit": "F",
+          "temperatureTrend": null,
+          "probabilityOfPrecipitation": {
+            "unitCode": "wmoUnit:percent",
+            "value": 0
+          },
+          "windSpeed": "2 to 13 mph",
+          "windDirection": "W",
+          "icon": "https://api.weather.gov/icons/land/day/skc?size=medium",
+          "shortForecast": "Sunny",
+          "detailedForecast": "Sunny, with a high near 80. West wind 2 to 13 mph, with gusts as high as 24 mph."
+        },
+        {
+          "number": 10,
+          "name": "Saturday Night",
+          "startTime": "2026-03-21T18:00:00-07:00",
+          "endTime": "2026-03-22T06:00:00-07:00",
+          "isDaytime": false,
+          "temperature": 43,
+          "temperatureUnit": "F",
+          "temperatureTrend": null,
+          "probabilityOfPrecipitation": {
+            "unitCode": "wmoUnit:percent",
+            "value": 0
+          },
+          "windSpeed": "5 to 12 mph",
+          "windDirection": "W",
+          "icon": "https://api.weather.gov/icons/land/night/few?size=medium",
+          "shortForecast": "Mostly Clear",
+          "detailedForecast": "Mostly clear, with a low around 43. West wind 5 to 12 mph, with gusts as high as 22 mph."
+        },
+        {
+          "number": 11,
+          "name": "Sunday",
+          "startTime": "2026-03-22T06:00:00-07:00",
+          "endTime": "2026-03-22T18:00:00-07:00",
+          "isDaytime": true,
+          "temperature": 75,
+          "temperatureUnit": "F",
+          "temperatureTrend": null,
+          "probabilityOfPrecipitation": {
+            "unitCode": "wmoUnit:percent",
+            "value": 0
+          },
+          "windSpeed": "3 to 16 mph",
+          "windDirection": "SW",
+          "icon": "https://api.weather.gov/icons/land/day/few?size=medium",
+          "shortForecast": "Sunny",
+          "detailedForecast": "Sunny, with a high near 75. Southwest wind 3 to 16 mph, with gusts as high as 26 mph."
+        },
+        {
+          "number": 12,
+          "name": "Sunday Night",
+          "startTime": "2026-03-22T18:00:00-07:00",
+          "endTime": "2026-03-23T06:00:00-07:00",
+          "isDaytime": false,
+          "temperature": 39,
+          "temperatureUnit": "F",
+          "temperatureTrend": null,
+          "probabilityOfPrecipitation": {
+            "unitCode": "wmoUnit:percent",
+            "value": 0
+          },
+          "windSpeed": "5 to 15 mph",
+          "windDirection": "SW",
+          "icon": "https://api.weather.gov/icons/land/night/sct?size=medium",
+          "shortForecast": "Partly Cloudy",
+          "detailedForecast": "Partly cloudy, with a low around 39. Southwest wind 5 to 15 mph, with gusts as high as 25 mph."
+        },
+        {
+          "number": 13,
+          "name": "Monday",
+          "startTime": "2026-03-23T06:00:00-07:00",
+          "endTime": "2026-03-23T18:00:00-07:00",
+          "isDaytime": true,
+          "temperature": 72,
+          "temperatureUnit": "F",
+          "temperatureTrend": null,
+          "probabilityOfPrecipitation": {
+            "unitCode": "wmoUnit:percent",
+            "value": 0
+          },
+          "windSpeed": "5 to 15 mph",
+          "windDirection": "SW",
+          "icon": "https://api.weather.gov/icons/land/day/few?size=medium",
+          "shortForecast": "Sunny",
+          "detailedForecast": "Sunny, with a high near 72. Southwest wind 5 to 15 mph, with gusts as high as 25 mph."
+        },
+        {
+          "number": 14,
+          "name": "Monday Night",
+          "startTime": "2026-03-23T18:00:00-07:00",
+          "endTime": "2026-03-24T06:00:00-07:00",
+          "isDaytime": false,
+          "temperature": 38,
+          "temperatureUnit": "F",
+          "temperatureTrend": null,
+          "probabilityOfPrecipitation": {
+            "unitCode": "wmoUnit:percent",
+            "value": 0
+          },
+          "windSpeed": "6 to 14 mph",
+          "windDirection": "SW",
+          "icon": "https://api.weather.gov/icons/land/night/sct?size=medium",
+          "shortForecast": "Partly Cloudy",
+          "detailedForecast": "Partly cloudy, with a low around 38. Southwest wind 6 to 14 mph, with gusts as high as 23 mph."
+        }
+      ],
+      "metadata": {
+        "updated": null,
+        "generatedAt": "2026-03-17T13:14:58+00:00",
+        "updateTime": "2026-03-17T11:12:21+00:00"
+      }
+    },
+    "weatherUnderground": {
+      "source": "Weather Underground",
+      "periods": [
+        {
+          "number": 1,
+          "name": "Tuesday",
+          "temperature": 72,
+          "temperatureUnit": "F",
+          "windSpeed": "11 mph",
+          "windDirection": "ENE",
+          "shortForecast": "Sunny",
+          "detailedForecast": "Mainly sunny. Highs in the low 70s and lows in the mid 30s.",
+          "icon": "",
+          "startTime": "2026-03-17T07:00:00-0700",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": {
+            "value": 30
+          }
+        },
+        {
+          "number": 2,
+          "name": "Tonight",
+          "temperature": 36,
+          "temperatureUnit": "F",
+          "windSpeed": "3 mph",
+          "windDirection": "NNE",
+          "shortForecast": "Clear",
+          "detailedForecast": "Mainly sunny. Highs in the low 70s and lows in the mid 30s.",
+          "icon": "",
+          "startTime": "2026-03-17T07:00:00-0700",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": {
+            "value": 41
+          }
+        },
+        {
+          "number": 3,
+          "name": "Wednesday",
+          "temperature": 77,
+          "temperatureUnit": "F",
+          "windSpeed": "10 mph",
+          "windDirection": "E",
+          "shortForecast": "Sunny",
+          "detailedForecast": "Sunny. Highs in the upper 70s and lows in the low 40s.",
+          "icon": "",
+          "startTime": "2026-03-18T07:00:00-0700",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": {
+            "value": 17
+          }
+        },
+        {
+          "number": 4,
+          "name": "Tomorrow night",
+          "temperature": 40,
+          "temperatureUnit": "F",
+          "windSpeed": "2 mph",
+          "windDirection": "N",
+          "shortForecast": "Mostly Clear",
+          "detailedForecast": "Sunny. Highs in the upper 70s and lows in the low 40s.",
+          "icon": "",
+          "startTime": "2026-03-18T07:00:00-0700",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": {
+            "value": 24
+          }
+        },
+        {
+          "number": 5,
+          "name": "Thursday",
+          "temperature": 82,
+          "temperatureUnit": "F",
+          "windSpeed": "7 mph",
+          "windDirection": "ESE",
+          "shortForecast": "Sunny",
+          "detailedForecast": "Sunny. Highs in the low 80s and lows in the low 40s.",
+          "icon": "",
+          "startTime": "2026-03-19T07:00:00-0700",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": {
+            "value": 13
+          }
+        },
+        {
+          "number": 6,
+          "name": "Thursday night",
+          "temperature": 43,
+          "temperatureUnit": "F",
+          "windSpeed": "2 mph",
+          "windDirection": "NNE",
+          "shortForecast": "Clear",
+          "detailedForecast": "Sunny. Highs in the low 80s and lows in the low 40s.",
+          "icon": "",
+          "startTime": "2026-03-19T07:00:00-0700",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": {
+            "value": 26
+          }
+        },
+        {
+          "number": 7,
+          "name": "Friday",
+          "temperature": 82,
+          "temperatureUnit": "F",
+          "windSpeed": "8 mph",
+          "windDirection": "S",
+          "shortForecast": "Sunny",
+          "detailedForecast": "Mainly sunny. Highs in the low 80s and lows in the low 40s.",
+          "icon": "",
+          "startTime": "2026-03-20T07:00:00-0700",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": {
+            "value": 14
+          }
+        },
+        {
+          "number": 8,
+          "name": "Friday night",
+          "temperature": 43,
+          "temperatureUnit": "F",
+          "windSpeed": "3 mph",
+          "windDirection": "W",
+          "shortForecast": "Clear",
+          "detailedForecast": "Mainly sunny. Highs in the low 80s and lows in the low 40s.",
+          "icon": "",
+          "startTime": "2026-03-20T07:00:00-0700",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": {
+            "value": 26
+          }
+        },
+        {
+          "number": 9,
+          "name": "Saturday",
+          "temperature": 80,
+          "temperatureUnit": "F",
+          "windSpeed": "14 mph",
+          "windDirection": "WSW",
+          "shortForecast": "Sunny",
+          "detailedForecast": "Sunshine. Highs in the low 80s and lows in the low 40s.",
+          "icon": "",
+          "startTime": "2026-03-21T07:00:00-0700",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": {
+            "value": 14
+          }
+        },
+        {
+          "number": 10,
+          "name": "Saturday night",
+          "temperature": 41,
+          "temperatureUnit": "F",
+          "windSpeed": "8 mph",
+          "windDirection": "W",
+          "shortForecast": "Mostly Clear",
+          "detailedForecast": "Sunshine. Highs in the low 80s and lows in the low 40s.",
+          "icon": "",
+          "startTime": "2026-03-21T07:00:00-0700",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": {
+            "value": 31
+          }
+        },
+        {
+          "number": 11,
+          "name": "Sunday",
+          "temperature": 75,
+          "temperatureUnit": "F",
+          "windSpeed": "14 mph",
+          "windDirection": "SW",
+          "shortForecast": "Partly Cloudy",
+          "detailedForecast": "Partly cloudy. Highs in the mid 70s and lows in the low 40s.",
+          "icon": "",
+          "startTime": "2026-03-22T07:00:00-0700",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": {
+            "value": 17
+          }
+        },
+        {
+          "number": 12,
+          "name": "Sunday night",
+          "temperature": 42,
+          "temperatureUnit": "F",
+          "windSpeed": "8 mph",
+          "windDirection": "WSW",
+          "shortForecast": "Partly Cloudy",
+          "detailedForecast": "Partly cloudy. Highs in the mid 70s and lows in the low 40s.",
+          "icon": "",
+          "startTime": "2026-03-22T07:00:00-0700",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": {
+            "value": 31
+          }
+        }
+      ],
+      "metadata": {
+        "fetched_at": "2026-03-17T13:14:58.669965+00:00",
+        "note": "Weather Underground does not provide explicit forecast issue time"
+      }
+    },
+    "ecmwf": {
+      "source": "ECMWF via Open-Meteo",
+      "periods": [
+        {
+          "number": 1,
+          "name": "Today",
+          "temperature": 69,
+          "temperatureUnit": "F",
+          "windSpeed": "6 mph",
+          "windDirection": "NNE",
+          "shortForecast": "Partly Cloudy",
+          "detailedForecast": "Partly Cloudy",
+          "icon": "",
+          "startTime": "2026-03-17T12:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 2,
+          "name": "Tonight",
+          "temperature": 39,
+          "temperatureUnit": "F",
+          "windSpeed": "6 mph",
+          "windDirection": "NNE",
+          "shortForecast": "Partly Cloudy",
+          "detailedForecast": "Partly Cloudy",
+          "icon": "",
+          "startTime": "2026-03-17T00:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 3,
+          "name": "Tomorrow",
+          "temperature": 74,
+          "temperatureUnit": "F",
+          "windSpeed": "5 mph",
+          "windDirection": "NE",
+          "shortForecast": "Clear",
+          "detailedForecast": "Clear",
+          "icon": "",
+          "startTime": "2026-03-18T12:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 4,
+          "name": "Tomorrow Night",
+          "temperature": 45,
+          "temperatureUnit": "F",
+          "windSpeed": "5 mph",
+          "windDirection": "NE",
+          "shortForecast": "Clear",
+          "detailedForecast": "Clear",
+          "icon": "",
+          "startTime": "2026-03-18T00:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 5,
+          "name": "Thursday",
+          "temperature": 79,
+          "temperatureUnit": "F",
+          "windSpeed": "4 mph",
+          "windDirection": "NE",
+          "shortForecast": "Mostly Clear",
+          "detailedForecast": "Mostly Clear",
+          "icon": "",
+          "startTime": "2026-03-19T12:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 6,
+          "name": "Thursday Night",
+          "temperature": 52,
+          "temperatureUnit": "F",
+          "windSpeed": "4 mph",
+          "windDirection": "NE",
+          "shortForecast": "Mostly Clear",
+          "detailedForecast": "Mostly Clear",
+          "icon": "",
+          "startTime": "2026-03-19T00:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 7,
+          "name": "Friday",
+          "temperature": 79,
+          "temperatureUnit": "F",
+          "windSpeed": "9 mph",
+          "windDirection": "WSW",
+          "shortForecast": "Clear",
+          "detailedForecast": "Clear",
+          "icon": "",
+          "startTime": "2026-03-20T12:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 8,
+          "name": "Friday Night",
+          "temperature": 57,
+          "temperatureUnit": "F",
+          "windSpeed": "9 mph",
+          "windDirection": "WSW",
+          "shortForecast": "Clear",
+          "detailedForecast": "Clear",
+          "icon": "",
+          "startTime": "2026-03-20T00:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 9,
+          "name": "Saturday",
+          "temperature": 75,
+          "temperatureUnit": "F",
+          "windSpeed": "11 mph",
+          "windDirection": "W",
+          "shortForecast": "Mostly Clear",
+          "detailedForecast": "Mostly Clear",
+          "icon": "",
+          "startTime": "2026-03-21T12:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 10,
+          "name": "Saturday Night",
+          "temperature": 54,
+          "temperatureUnit": "F",
+          "windSpeed": "11 mph",
+          "windDirection": "W",
+          "shortForecast": "Mostly Clear",
+          "detailedForecast": "Mostly Clear",
+          "icon": "",
+          "startTime": "2026-03-21T00:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 11,
+          "name": "Sunday",
+          "temperature": 73,
+          "temperatureUnit": "F",
+          "windSpeed": "9 mph",
+          "windDirection": "W",
+          "shortForecast": "Overcast",
+          "detailedForecast": "Overcast",
+          "icon": "",
+          "startTime": "2026-03-22T12:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 12,
+          "name": "Sunday Night",
+          "temperature": 53,
+          "temperatureUnit": "F",
+          "windSpeed": "9 mph",
+          "windDirection": "W",
+          "shortForecast": "Overcast",
+          "detailedForecast": "Overcast",
+          "icon": "",
+          "startTime": "2026-03-22T00:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 13,
+          "name": "Monday",
+          "temperature": 68,
+          "temperatureUnit": "F",
+          "windSpeed": "8 mph",
+          "windDirection": "WSW",
+          "shortForecast": "Overcast",
+          "detailedForecast": "Overcast",
+          "icon": "",
+          "startTime": "2026-03-23T12:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 14,
+          "name": "Monday Night",
+          "temperature": 51,
+          "temperatureUnit": "F",
+          "windSpeed": "8 mph",
+          "windDirection": "WSW",
+          "shortForecast": "Overcast",
+          "detailedForecast": "Overcast",
+          "icon": "",
+          "startTime": "2026-03-23T00:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 15,
+          "name": "Tuesday",
+          "temperature": 71,
+          "temperatureUnit": "F",
+          "windSpeed": "8 mph",
+          "windDirection": "WSW",
+          "shortForecast": "Partly Cloudy",
+          "detailedForecast": "Partly Cloudy",
+          "icon": "",
+          "startTime": "2026-03-24T12:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 16,
+          "name": "Tuesday Night",
+          "temperature": 49,
+          "temperatureUnit": "F",
+          "windSpeed": "8 mph",
+          "windDirection": "WSW",
+          "shortForecast": "Partly Cloudy",
+          "detailedForecast": "Partly Cloudy",
+          "icon": "",
+          "startTime": "2026-03-24T00:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 17,
+          "name": "Wednesday",
+          "temperature": 68,
+          "temperatureUnit": "F",
+          "windSpeed": "15 mph",
+          "windDirection": "WSW",
+          "shortForecast": "Partly Cloudy",
+          "detailedForecast": "Partly Cloudy",
+          "icon": "",
+          "startTime": "2026-03-25T12:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 18,
+          "name": "Wednesday Night",
+          "temperature": 51,
+          "temperatureUnit": "F",
+          "windSpeed": "15 mph",
+          "windDirection": "WSW",
+          "shortForecast": "Partly Cloudy",
+          "detailedForecast": "Partly Cloudy",
+          "icon": "",
+          "startTime": "2026-03-25T00:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 19,
+          "name": "Thursday",
+          "temperature": 65,
+          "temperatureUnit": "F",
+          "windSpeed": "10 mph",
+          "windDirection": "WSW",
+          "shortForecast": "Overcast",
+          "detailedForecast": "Overcast",
+          "icon": "",
+          "startTime": "2026-03-26T12:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        },
+        {
+          "number": 20,
+          "name": "Thursday Night",
+          "temperature": 45,
+          "temperatureUnit": "F",
+          "windSpeed": "10 mph",
+          "windDirection": "WSW",
+          "shortForecast": "Overcast",
+          "detailedForecast": "Overcast",
+          "icon": "",
+          "startTime": "2026-03-26T00:00:00-05:00",
+          "probabilityOfPrecipitation": {
+            "value": 0
+          },
+          "relativeHumidity": null
+        }
+      ],
+      "metadata": {
+        "generationtime_ms": 0.5517005920410156,
+        "utc_offset_seconds": -14400,
+        "model": "ecmwf_ifs025",
+        "model_run_time": "2026-03-17T12:00:00+00:00"
+      }
+    }
+  }
+}
