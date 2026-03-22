@@ -9,7 +9,7 @@ This script is designed to run in GitHub Actions as a scheduled job.
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional
 import urllib.request
 import urllib.error
@@ -377,6 +377,12 @@ def fetch_ecmwf_forecast(latitude: float, longitude: float) -> Optional[tuple[Li
     for i in range(len(daily['time'])):
         date = daily['time'][i]
         
+        # Calculate next day's date for night period
+        # Night period starts at midnight at the END of this day (start of next day)
+        date_obj = datetime.strptime(date, '%Y-%m-%d')
+        next_day = date_obj + timedelta(days=1)
+        night_date = next_day.strftime('%Y-%m-%d')
+        
         # Day period
         day_period = {
             'number': i * 2 + 1,
@@ -395,7 +401,7 @@ def fetch_ecmwf_forecast(latitude: float, longitude: float) -> Optional[tuple[Li
             'relativeHumidity': None
         }
         
-        # Night period
+        # Night period (uses next day's date at midnight)
         night_period = {
             'number': i * 2 + 2,
             'name': format_day_name(date, False),
@@ -406,7 +412,7 @@ def fetch_ecmwf_forecast(latitude: float, longitude: float) -> Optional[tuple[Li
             'shortForecast': interpret_weather_code(daily['weathercode'][i], False),
             'detailedForecast': interpret_weather_code(daily['weathercode'][i], False),
             'icon': '',
-            'startTime': f"{date}T00:00:00-07:00",  # Arizona MST (UTC-7, no DST)
+            'startTime': f"{night_date}T00:00:00-07:00",  # Next day at midnight (Arizona MST)
             'probabilityOfPrecipitation': {
                 'value': estimate_precip_probability(daily['precipitation_sum'][i])
             },
