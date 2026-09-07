@@ -1,0 +1,27 @@
+name: Daily Forecast Email
+
+on:
+  schedule:
+    - cron: '0 13 * * *'   # 13:00 UTC ≈ 6am MST (Arizona has no DST, so this stays fixed year-round)
+  workflow_dispatch:        # lets you manually trigger it from the Actions tab for testing
+
+jobs:
+  send-forecast:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Send forecast email
+        env:
+          GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        run: python send_forecast.py
