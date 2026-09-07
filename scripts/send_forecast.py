@@ -14,7 +14,13 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Dict, List
 
-from fetch_forecasts import fetch_nws_forecast, log
+from fetch_forecasts import (
+    fetch_nws_forecast,
+    log,
+    FLAGSTAFF_LATITUDE,
+    FLAGSTAFF_LONGITUDE,
+    FLAGSTAFF_STATION_NAME,
+)
 
 
 def format_forecast_text(station_name: str, periods: List[Dict]) -> str:
@@ -64,9 +70,12 @@ def main():
     """Main execution function."""
     log("🚀 Starting daily forecast email")
 
-    station_name = os.getenv('STATION_NAME', 'Default Station')
-    latitude = float(os.getenv('STATION_LAT', '42.7325'))
-    longitude = float(os.getenv('STATION_LON', '-84.5555'))
+    # Location is intentionally NOT read from the environment - imported
+    # directly from fetch_forecasts.py so both scripts always agree on
+    # where "the forecast" means, with no secret to misconfigure.
+    station_name = FLAGSTAFF_STATION_NAME
+    latitude = FLAGSTAFF_LATITUDE
+    longitude = FLAGSTAFF_LONGITUDE
 
     nws_result = fetch_nws_forecast(latitude, longitude)
 
