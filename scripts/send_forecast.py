@@ -23,3 +23,4 @@ if __name__ == "__main__":
     # replace with your actual forecast-generation logic
     forecast = "Today's Flagstaff forecast: sunny, high 78°F, low 45°F."
     send_forecast_email(forecast, "Flagstaff Forecast — Today")
+    print("Email sent successfully.")
