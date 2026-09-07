@@ -17,6 +17,14 @@ import urllib.parse
 from pathlib import Path
 
 
+# This project only ever tracks one specific Flagstaff-area location -
+# hardcoded so it can never silently drift to the wrong place due to a
+# missing/incorrect secret. (35°14'11.3"N 111°39'56.6"W)
+FLAGSTAFF_LATITUDE = 35.236472
+FLAGSTAFF_LONGITUDE = -111.665722
+FLAGSTAFF_STATION_NAME = "Flagstaff"
+
+
 def log(message: str):
     """Print timestamped log message."""
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -341,15 +349,13 @@ def main():
     log("🚀 Starting forecast snapshot collection")
 
     # Get configuration from environment variables.
-    # The forecast location is entirely controlled by STATION_LAT/STATION_LON
-    # (set as GitHub Actions secrets/env vars) - the fallback values below
-    # are placeholder coordinates and are NOT Flagstaff. They only apply if
-    # STATION_LAT/STATION_LON are missing from the environment, so make sure
-    # those secrets are set to Flagstaff's coordinates (approx. 35.1983, -111.6513).
+    # Location is intentionally NOT read from the environment - see the
+    # FLAGSTAFF_LATITUDE/FLAGSTAFF_LONGITUDE constants above. STATION_ID is
+    # still configurable since it identifies your specific WU PWS station.
     station_id = os.getenv('STATION_ID', 'DEFAULT_STATION')
-    station_name = os.getenv('STATION_NAME', 'Default Station')
-    latitude = float(os.getenv('STATION_LAT', '42.7325'))
-    longitude = float(os.getenv('STATION_LON', '-84.5555'))
+    station_name = FLAGSTAFF_STATION_NAME
+    latitude = FLAGSTAFF_LATITUDE
+    longitude = FLAGSTAFF_LONGITUDE
     output_dir = Path(os.getenv('OUTPUT_DIR', 'snapshots'))
 
     log(f"📍 Station: {station_name} ({station_id})")
