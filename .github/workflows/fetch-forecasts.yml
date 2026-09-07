@@ -2,8 +2,8 @@ name: Fetch Daily Forecasts
 
 on:
   # Run daily
-  schedule:
-    - cron: '0 12 * * *'  # 8 AM EST
+  # schedule:
+  #  - cron: '0 12 * * *'  # 8 AM EST
 
   
   # Allow manual triggering for testing
