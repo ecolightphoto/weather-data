@@ -340,7 +340,12 @@ def main():
     """Main execution function."""
     log("🚀 Starting forecast snapshot collection")
 
-    # Get configuration from environment variables
+    # Get configuration from environment variables.
+    # The forecast location is entirely controlled by STATION_LAT/STATION_LON
+    # (set as GitHub Actions secrets/env vars) - the fallback values below
+    # are placeholder coordinates and are NOT Flagstaff. They only apply if
+    # STATION_LAT/STATION_LON are missing from the environment, so make sure
+    # those secrets are set to Flagstaff's coordinates (approx. 35.1983, -111.6513).
     station_id = os.getenv('STATION_ID', 'DEFAULT_STATION')
     station_name = os.getenv('STATION_NAME', 'Default Station')
     latitude = float(os.getenv('STATION_LAT', '42.7325'))
