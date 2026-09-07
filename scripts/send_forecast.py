@@ -23,9 +23,10 @@ from fetch_forecasts import (
 )
 
 
-def format_forecast_text(station_name: str, periods: List[Dict]) -> str:
-    """Format NWS forecast periods into a plain-text email body."""
-    lines = [f"Forecast for {station_name}", ""]
+def format_forecast_html(station_name: str, periods: List[Dict]) -> str:
+    """Format NWS forecast periods into an HTML email body, with each
+    period's summary line (name/temp/short forecast) in bold."""
+    lines = [f"<p>Forecast for {station_name}</p>"]
 
     for period in periods:
         name = period.get('name', 'Unknown')
@@ -36,17 +37,18 @@ def format_forecast_text(station_name: str, periods: List[Dict]) -> str:
         wind_dir = period.get('windDirection', '')
         detailed = period.get('detailedForecast', '')
 
-        lines.append(f"{name}: {temp}°{temp_unit}, {short_forecast}")
+        lines.append("<p>")
+        lines.append(f"<b>{name}: {temp}°{temp_unit}, {short_forecast}</b><br>")
         if wind_speed:
-            lines.append(f"  Wind: {wind_speed} {wind_dir}".rstrip())
+            lines.append(f"Wind: {wind_speed} {wind_dir}".rstrip() + "<br>")
         if detailed:
-            lines.append(f"  {detailed}")
-        lines.append("")
+            lines.append(f"{detailed}<br>")
+        lines.append("</p>")
 
     return "\n".join(lines)
 
 
-def send_forecast_email(body_text: str, subject: str):
+def send_forecast_email(body_html: str, subject: str):
     """Send the forecast email via Gmail SMTP."""
     sender = os.environ["GMAIL_ADDRESS"]
     password = os.environ["GMAIL_APP_PASSWORD"]
@@ -56,7 +58,7 @@ def send_forecast_email(body_text: str, subject: str):
     msg["From"] = sender
     msg["To"] = recipient
     msg["Subject"] = subject
-    msg.attach(MIMEText(body_text, "plain"))
+    msg.attach(MIMEText(body_html, "html"))
 
     with smtplib.SMTP("smtp.gmail.com", 587) as server:
         server.starttls()
@@ -85,10 +87,10 @@ def main():
 
     periods, metadata = nws_result
 
-    body_text = format_forecast_text(station_name, periods)
+    body_html = format_forecast_html(station_name, periods)
     subject = f"{station_name} Forecast"
 
-    send_forecast_email(body_text, subject)
+    send_forecast_email(body_html, subject)
 
     log("✅ Daily forecast email complete")
 
