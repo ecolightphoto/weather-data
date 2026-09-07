@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-09-07T23:02:41.533974Z",
+  "timestamp": "2026-09-07T23:38:39.587933Z",
   "station": {
     "id": "KAZFLAGS516",
-    "name": "Home Station",
-    "latitude": 35.236462,
-    "longitude": -111.66571
+    "name": "Flagstaff",
+    "latitude": 35.236472,
+    "longitude": -111.665722
   },
   "forecasts": {
     "nws": {
@@ -279,7 +279,7 @@
       ],
       "metadata": {
         "updated": null,
-        "generatedAt": "2026-09-07T23:02:41+00:00",
+        "generatedAt": "2026-09-07T23:38:39+00:00",
         "updateTime": "2026-09-07T22:13:12+00:00"
       }
     }

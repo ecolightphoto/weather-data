@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-09-07T23:02:42.564967Z",
+  "timestamp": "2026-09-07T23:38:40.609683Z",
   "station": {
     "id": "KAZFLAGS516",
-    "name": "Home Station",
-    "latitude": 35.236462,
-    "longitude": -111.66571
+    "name": "Flagstaff",
+    "latitude": 35.236472,
+    "longitude": -111.665722
   },
   "forecasts": {
     "nws": {
@@ -4225,7 +4225,7 @@
       ],
       "metadata": {
         "updated": null,
-        "generatedAt": "2026-09-07T23:02:41+00:00",
+        "generatedAt": "2026-09-07T23:38:39+00:00",
         "updateTime": "2026-09-07T22:13:12+00:00"
       }
     }
@@ -4233,7 +4233,7 @@
   "observations": {
     "source": "Weather Underground PWS",
     "stationId": "KAZFLAGS516",
-    "capturedAt": "2026-09-07T23:02:42.564967Z",
+    "capturedAt": "2026-09-07T23:38:40.609683Z",
     "hours": [
       {
         "time": "2026-09-07T07:04:00Z",
@@ -5571,6 +5571,55 @@
         "precip": 0.0,
         "humidity": 38,
         "windSpeed": 3
+      },
+      {
+        "time": "2026-09-07T23:04:00Z",
+        "temp": 80,
+        "precip": 0.0,
+        "humidity": 37,
+        "windSpeed": 4
+      },
+      {
+        "time": "2026-09-07T23:09:00Z",
+        "temp": 79,
+        "precip": 0.0,
+        "humidity": 37,
+        "windSpeed": 4
+      },
+      {
+        "time": "2026-09-07T23:14:00Z",
+        "temp": 78,
+        "precip": 0.0,
+        "humidity": 38,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-09-07T23:19:00Z",
+        "temp": 77,
+        "precip": 0.0,
+        "humidity": 39,
+        "windSpeed": 2
+      },
+      {
+        "time": "2026-09-07T23:24:00Z",
+        "temp": 78,
+        "precip": 0.0,
+        "humidity": 39,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-09-07T23:29:00Z",
+        "temp": 77,
+        "precip": 0.0,
+        "humidity": 39,
+        "windSpeed": 3
+      },
+      {
+        "time": "2026-09-07T23:34:00Z",
+        "temp": 77,
+        "precip": 0.0,
+        "humidity": 38,
+        "windSpeed": 4
       }
     ]
   }
