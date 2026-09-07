@@ -3,6 +3,7 @@ name: Daily Forecast Email
 on:
   schedule:
     - cron: '0 12 * * *'  # 8 AM EST
+    
   workflow_dispatch:        # lets you manually trigger it from the Actions tab for testing
 
 jobs:
