@@ -62,51 +62,73 @@ def get_weather_emoji(
     is_snow = 'snow' in text or 'flurries' in text or 'blizzard' in text or 'sleet' in text
     is_rain = 'rain' in text or 'shower' in text or 'drizzle' in text
 
+    icon = None
+    reason = ""
+
     if (is_thunder or is_snow or is_rain) and pop_value is not None:
         if pop_value >= PRECIP_THRESHOLD_HIGH:
             if is_thunder:
-                return "⛈️"
+                icon, reason = "\u26c8\ufe0f", "precip >= HIGH, thunder"
+            elif is_snow:
+                icon, reason = "\u2744\ufe0f", "precip >= HIGH, snow"
+            else:
+                icon, reason = "\U0001f327\ufe0f", "precip >= HIGH, rain"
+        elif pop_value >= PRECIP_THRESHOLD_LOW:
             if is_snow:
-                return "❄️"
-            return "🌧️"
-        if pop_value >= PRECIP_THRESHOLD_LOW:
-            if is_snow:
-                return "🌨️"  # light/possible snow
-            return "🌦️"  # sun/cloud behind rain - possible showers
+                icon, reason = "\U0001f328\ufe0f", "precip >= LOW, snow"  # light/possible snow
+            else:
+                icon, reason = "\U0001f326\ufe0f", "precip >= LOW, rain"  # possible showers
         # Below the low threshold: precip chance is negligible enough that
         # we ignore the "shower"/"snow" wording and fall through to the
         # plain sky-condition check below - checking detailed_forecast too,
         # since shortForecast may contain nothing but the precip qualifier.
     elif is_thunder:
-        return "⛈️"
+        icon, reason = "\u26c8\ufe0f", "thunder, no pop_value"
     elif is_snow:
-        return "❄️"
+        icon, reason = "\u2744\ufe0f", "snow, no pop_value"
     elif is_rain:
-        return "🌧️"
+        icon, reason = "\U0001f327\ufe0f", "rain, no pop_value"
 
-    # Sky-condition check: shortForecast first, then detailedForecast as a
-    # fallback for cases like "Chance Showers And Thunderstorms" where the
-    # actual sky description ("Mostly sunny") only appears in the detail.
-    combined_text = text
-    if detailed_forecast:
-        combined_text = f"{text} {detailed_forecast.lower()}"
+    if icon is None:
+        # Sky-condition check: shortForecast first, then detailedForecast as
+        # a fallback for cases like "Chance Showers And Thunderstorms" where
+        # the actual sky description ("Mostly sunny") only appears in the
+        # detail. Checked most-specific-phrase-first, since e.g. "partly
+        # cloudy" contains the substring "cloudy" and would otherwise always
+        # match the generic cloudy check before reaching the partly check.
+        combined_text = text
+        if detailed_forecast:
+            combined_text = f"{text} {detailed_forecast.lower()}"
 
-    if 'fog' in combined_text or 'haze' in combined_text or 'mist' in combined_text:
-        return "🌫️"
-    if 'cloudy' in combined_text or 'overcast' in combined_text:
-        return "☁️"
-    if 'partly' in combined_text or 'mostly sunny' in combined_text or 'mostly clear' in combined_text:
-        return "⛅" if is_daytime else "🌙"
-    if 'clear' in combined_text or 'sunny' in combined_text:
-        return "☀️" if is_daytime else "🌙"
-    if 'wind' in combined_text:
-        return "💨"
+        if 'fog' in combined_text or 'haze' in combined_text or 'mist' in combined_text:
+            icon, reason = "\U0001f32b\ufe0f", "fog/haze/mist"
+        elif 'mostly cloudy' in combined_text:
+            icon, reason = ("\U0001f325\ufe0f" if is_daytime else "\u2601\ufe0f"), "mostly cloudy"
+        elif 'partly cloudy' in combined_text or 'partly sunny' in combined_text:
+            icon, reason = ("\u26c5" if is_daytime else "\U0001f319\u2601\ufe0f"), "partly cloudy/sunny"
+        elif 'mostly sunny' in combined_text or 'mostly clear' in combined_text:
+            icon, reason = ("\U0001f324\ufe0f" if is_daytime else "\U0001f319"), "mostly sunny/clear"
+        elif 'cloudy' in combined_text or 'overcast' in combined_text:
+            icon, reason = "\u2601\ufe0f", "cloudy/overcast (generic)"
+        elif 'clear' in combined_text or 'sunny' in combined_text:
+            icon, reason = ("\u2600\ufe0f" if is_daytime else "\U0001f319"), "clear/sunny (generic)"
+        elif 'wind' in combined_text:
+            icon, reason = "\U0001f4a8", "wind"
+        else:
+            # Nothing matched in either string - default to a neutral
+            # partly-cloudy icon rather than a thermometer fallback, since
+            # an unstated sky condition is far more plausibly partly cloudy
+            # than it is worth a generic "unknown" icon.
+            icon, reason = ("\u26c5" if is_daytime else "\U0001f319"), "no match, default"
 
-    # Nothing matched in either string - default to a neutral partly-cloudy
-    # icon rather than the thermometer fallback, since a day/night period
-    # with an unstated sky condition is far more plausibly partly cloudy
-    # than it is worth a generic "unknown" icon.
-    return "⛅" if is_daytime else "🌙"
+    # TEMPORARY DEBUG - remove once icon selection looks right across a
+    # few real days of emails.
+    log(
+        f"icon debug: short='{short_forecast}' pop={pop_value} "
+        f"daytime={is_daytime} -> {icon} ({reason})"
+    )
+
+    return icon
 
 
 def group_periods_into_days(periods: List[Dict]) -> List[Dict]:
@@ -155,7 +177,7 @@ def format_period_detail_html(period: Dict) -> str:
     detailed = period.get('detailedForecast', '')
 
     lines = [f"<p style='margin:0 0 10px;'>"]
-    lines.append(f"<b>{name}: {temp}°{temp_unit}, {short_forecast}</b><br>")
+    lines.append(f"<b>{name}: {temp}\u00b0{temp_unit}, {short_forecast}</b><br>")
     if wind_speed:
         lines.append(f"Wind: {wind_speed} {wind_dir}".rstrip() + "<br>")
     if detailed:
@@ -184,7 +206,7 @@ def format_summary_boxes_html(day: Optional[Dict], night: Optional[Dict]) -> str
             f"<div style='{box_style}'>"
             f"<span style='font-size:22px;'>{icon}</span>"
             f"<span><span style='display:block;font-size:12px;color:#666;'>Day &middot; High</span>"
-            f"<span style='font-size:17px;font-weight:bold;'>{high}°{temp_unit}</span></span>"
+            f"<span style='font-size:17px;font-weight:bold;'>{high}\u00b0{temp_unit}</span></span>"
             f"</div>"
         )
 
@@ -199,7 +221,7 @@ def format_summary_boxes_html(day: Optional[Dict], night: Optional[Dict]) -> str
             f"<div style='{box_style}'>"
             f"<span style='font-size:22px;'>{icon}</span>"
             f"<span><span style='display:block;font-size:12px;color:#666;'>Night &middot; Low</span>"
-            f"<span style='font-size:17px;font-weight:bold;'>{low}°{temp_unit}</span></span>"
+            f"<span style='font-size:17px;font-weight:bold;'>{low}\u00b0{temp_unit}</span></span>"
             f"</div>"
         )
 
