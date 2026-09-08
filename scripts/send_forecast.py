@@ -36,7 +36,12 @@ PRECIP_THRESHOLD_LOW = 40
 PRECIP_THRESHOLD_HIGH = 70
 
 
-def get_weather_emoji(short_forecast: str, is_daytime: bool, pop_value: Optional[int] = None) -> str:
+def get_weather_emoji(
+    short_forecast: str,
+    is_daytime: bool,
+    pop_value: Optional[int] = None,
+    detailed_forecast: str = "",
+) -> str:
     """Map an NWS shortForecast string (plus, when available, its
     probabilityOfPrecipitation value) to a representative emoji icon.
 
@@ -45,6 +50,11 @@ def get_weather_emoji(short_forecast: str, is_daytime: bool, pop_value: Optional
     the underlying sky condition instead; between LOW and HIGH, a lighter
     "possible" icon is shown; at/above HIGH, the full rain/snow icon shows.
     If pop_value is unavailable (None), falls back to text-only matching.
+
+    When shortForecast is entirely a precip qualifier (e.g. "Slight Chance
+    Showers And Thunderstorms" with no sky-condition words of its own), the
+    sky-condition check also searches detailed_forecast, since NWS often
+    states "Mostly sunny"/"Mostly clear" etc. only there in that case.
     """
     text = short_forecast.lower()
 
@@ -65,7 +75,8 @@ def get_weather_emoji(short_forecast: str, is_daytime: bool, pop_value: Optional
             return "🌦️"  # sun/cloud behind rain - possible showers
         # Below the low threshold: precip chance is negligible enough that
         # we ignore the "shower"/"snow" wording and fall through to the
-        # plain sky-condition icon below.
+        # plain sky-condition check below - checking detailed_forecast too,
+        # since shortForecast may contain nothing but the precip qualifier.
     elif is_thunder:
         return "⛈️"
     elif is_snow:
@@ -73,18 +84,29 @@ def get_weather_emoji(short_forecast: str, is_daytime: bool, pop_value: Optional
     elif is_rain:
         return "🌧️"
 
-    if 'fog' in text or 'haze' in text or 'mist' in text:
+    # Sky-condition check: shortForecast first, then detailedForecast as a
+    # fallback for cases like "Chance Showers And Thunderstorms" where the
+    # actual sky description ("Mostly sunny") only appears in the detail.
+    combined_text = text
+    if detailed_forecast:
+        combined_text = f"{text} {detailed_forecast.lower()}"
+
+    if 'fog' in combined_text or 'haze' in combined_text or 'mist' in combined_text:
         return "🌫️"
-    if 'cloudy' in text or 'overcast' in text:
+    if 'cloudy' in combined_text or 'overcast' in combined_text:
         return "☁️"
-    if 'partly' in text or 'mostly sunny' in text or 'mostly clear' in text:
+    if 'partly' in combined_text or 'mostly sunny' in combined_text or 'mostly clear' in combined_text:
         return "⛅" if is_daytime else "🌙"
-    if 'clear' in text or 'sunny' in text:
+    if 'clear' in combined_text or 'sunny' in combined_text:
         return "☀️" if is_daytime else "🌙"
-    if 'wind' in text:
+    if 'wind' in combined_text:
         return "💨"
 
-    return "🌡️"  # fallback for anything unmatched
+    # Nothing matched in either string - default to a neutral partly-cloudy
+    # icon rather than the thermometer fallback, since a day/night period
+    # with an unstated sky condition is far more plausibly partly cloudy
+    # than it is worth a generic "unknown" icon.
+    return "⛅" if is_daytime else "🌙"
 
 
 def group_periods_into_days(periods: List[Dict]) -> List[Dict]:
@@ -153,7 +175,9 @@ def format_summary_boxes_html(day: Optional[Dict], night: Optional[Dict]) -> str
 
     if day:
         pop = day.get('probabilityOfPrecipitation', {}) or {}
-        icon = get_weather_emoji(day.get('shortForecast', ''), True, pop.get('value'))
+        icon = get_weather_emoji(
+            day.get('shortForecast', ''), True, pop.get('value'), day.get('detailedForecast', '')
+        )
         high = day.get('temperature')
         temp_unit = day.get('temperatureUnit', '')
         cells.append(
@@ -166,7 +190,9 @@ def format_summary_boxes_html(day: Optional[Dict], night: Optional[Dict]) -> str
 
     if night:
         pop = night.get('probabilityOfPrecipitation', {}) or {}
-        icon = get_weather_emoji(night.get('shortForecast', ''), False, pop.get('value'))
+        icon = get_weather_emoji(
+            night.get('shortForecast', ''), False, pop.get('value'), night.get('detailedForecast', '')
+        )
         low = night.get('temperature')
         temp_unit = night.get('temperatureUnit', '')
         cells.append(
