@@ -26,17 +26,53 @@ from fetch_forecasts import (
 # Arizona is fixed at UTC-7 year-round (no DST observed).
 ARIZONA_UTC_OFFSET = timedelta(hours=-7)
 
+# Precipitation-probability thresholds (%) used to decide how strongly a
+# rain/snow icon should show. Below LOW, precip chance is treated as
+# negligible and we fall back to the sky-condition icon (clear/cloudy/etc)
+# even if the forecast text mentions "chance of showers". Between LOW and
+# HIGH, we show a lighter "possible precip" icon. At/above HIGH, we show
+# the full rain/snow icon.
+PRECIP_THRESHOLD_LOW = 40
+PRECIP_THRESHOLD_HIGH = 70
 
-def get_weather_emoji(short_forecast: str, is_daytime: bool) -> str:
-    """Map an NWS shortForecast string to a representative emoji icon."""
+
+def get_weather_emoji(short_forecast: str, is_daytime: bool, pop_value: Optional[int] = None) -> str:
+    """Map an NWS shortForecast string (plus, when available, its
+    probabilityOfPrecipitation value) to a representative emoji icon.
+
+    Precipitation icons are gated by pop_value using a two-tier threshold:
+    below PRECIP_THRESHOLD_LOW, precip is treated as unlikely enough to show
+    the underlying sky condition instead; between LOW and HIGH, a lighter
+    "possible" icon is shown; at/above HIGH, the full rain/snow icon shows.
+    If pop_value is unavailable (None), falls back to text-only matching.
+    """
     text = short_forecast.lower()
 
-    if 'thunderstorm' in text or 't-storm' in text:
+    is_thunder = 'thunderstorm' in text or 't-storm' in text
+    is_snow = 'snow' in text or 'flurries' in text or 'blizzard' in text or 'sleet' in text
+    is_rain = 'rain' in text or 'shower' in text or 'drizzle' in text
+
+    if (is_thunder or is_snow or is_rain) and pop_value is not None:
+        if pop_value >= PRECIP_THRESHOLD_HIGH:
+            if is_thunder:
+                return "⛈️"
+            if is_snow:
+                return "❄️"
+            return "🌧️"
+        if pop_value >= PRECIP_THRESHOLD_LOW:
+            if is_snow:
+                return "🌨️"  # light/possible snow
+            return "🌦️"  # sun/cloud behind rain - possible showers
+        # Below the low threshold: precip chance is negligible enough that
+        # we ignore the "shower"/"snow" wording and fall through to the
+        # plain sky-condition icon below.
+    elif is_thunder:
         return "⛈️"
-    if 'snow' in text or 'flurries' in text or 'blizzard' in text or 'sleet' in text:
+    elif is_snow:
         return "❄️"
-    if 'rain' in text or 'shower' in text or 'drizzle' in text:
+    elif is_rain:
         return "🌧️"
+
     if 'fog' in text or 'haze' in text or 'mist' in text:
         return "🌫️"
     if 'cloudy' in text or 'overcast' in text:
@@ -116,7 +152,8 @@ def format_summary_boxes_html(day: Optional[Dict], night: Optional[Dict]) -> str
     cells = []
 
     if day:
-        icon = get_weather_emoji(day.get('shortForecast', ''), True)
+        pop = day.get('probabilityOfPrecipitation', {}) or {}
+        icon = get_weather_emoji(day.get('shortForecast', ''), True, pop.get('value'))
         high = day.get('temperature')
         temp_unit = day.get('temperatureUnit', '')
         cells.append(
@@ -128,7 +165,8 @@ def format_summary_boxes_html(day: Optional[Dict], night: Optional[Dict]) -> str
         )
 
     if night:
-        icon = get_weather_emoji(night.get('shortForecast', ''), False)
+        pop = night.get('probabilityOfPrecipitation', {}) or {}
+        icon = get_weather_emoji(night.get('shortForecast', ''), False, pop.get('value'))
         low = night.get('temperature')
         temp_unit = night.get('temperatureUnit', '')
         cells.append(
