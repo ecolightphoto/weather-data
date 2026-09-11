@@ -9,14 +9,17 @@ the snapshot-archival workflow.
 """
 
 import os
+import re
 import smtplib
 from datetime import datetime, timezone, timedelta
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Dict, List, Optional
+from zoneinfo import ZoneInfo
 
 from fetch_forecasts import (
     fetch_nws_forecast,
+    fetch_json,
     log,
     FLAGSTAFF_LATITUDE,
     FLAGSTAFF_LONGITUDE,
@@ -25,6 +28,15 @@ from fetch_forecasts import (
 
 # Arizona is fixed at UTC-7 year-round (no DST observed).
 ARIZONA_UTC_OFFSET = timedelta(hours=-7)
+LOCAL_TZ = ZoneInfo("America/Phoenix")  # Arizona - no DST, matches Flagstaff
+
+# NWS gridpoint identifier for the Flagstaff coordinate used elsewhere in
+# this project (FLAGSTAFF_LATITUDE/FLAGSTAFF_LONGITUDE) - confirmed correct.
+# Used only for the hourly QPF (rain total) lookup; the day/night forecast
+# itself still goes through fetch_nws_forecast()'s /points/ lookup.
+RAIN_GRID_URL = "https://api.weather.gov/gridpoints/FGZ/74,91"
+
+DURATION_RE = re.compile(r"PT(?:(\d+)H)?(?:(\d+)M)?")
 
 # Precipitation-probability thresholds (%) used to decide how strongly a
 # rain/snow icon should show. Below LOW, precip chance is treated as
@@ -34,6 +46,61 @@ ARIZONA_UTC_OFFSET = timedelta(hours=-7)
 # the full rain/snow icon.
 PRECIP_THRESHOLD_LOW = 40
 PRECIP_THRESHOLD_HIGH = 70
+
+
+def parse_duration_hours(duration: str) -> float:
+    """Parse an ISO 8601 duration like 'PT3H' or 'PT1H30M' into hours."""
+    match = DURATION_RE.fullmatch(duration)
+    if not match:
+        raise ValueError(f"Unexpected duration format: {duration}")
+    hours = int(match.group(1) or 0)
+    minutes = int(match.group(2) or 0)
+    return hours + minutes / 60
+
+
+def fetch_daily_rain_totals() -> Dict:
+    """Fetch NWS hourly QPF (quantitative precipitation forecast) and sum
+    it into midnight-to-midnight local-day totals, in inches. Returns
+    {date: inches}; returns {} if the fetch fails, so a rain-data outage
+    degrades gracefully rather than breaking the whole email."""
+    data = fetch_json(RAIN_GRID_URL)
+    if not data:
+        log("⚠️  Failed to fetch QPF grid data - rain totals will be omitted")
+        return {}
+
+    try:
+        qpf = data["properties"]["quantitativePrecipitation"]
+    except KeyError:
+        log("⚠️  QPF data missing from grid response - rain totals will be omitted")
+        return {}
+
+    uom = qpf.get("uom", "")
+    totals: Dict = {}
+
+    for entry in qpf.get("values", []):
+        value = entry.get("value")
+        if value is None:
+            continue
+
+        raw = float(value)
+        inches = raw / 25.4 if "mm" in uom else raw
+
+        start_str, duration_str = entry["validTime"].split("/")
+        start = datetime.fromisoformat(start_str).astimezone(LOCAL_TZ)
+        hours = parse_duration_hours(duration_str)
+
+        # Some intervals cover more than one hour (NWS merges equal
+        # consecutive values). Spread the total evenly across each
+        # covered hour so it lands in the right local day.
+        num_buckets = max(round(hours), 1)
+        inches_per_hour = inches / num_buckets
+
+        for i in range(num_buckets):
+            hour_start = start + timedelta(hours=i)
+            day = hour_start.date()
+            totals[day] = totals.get(day, 0.0) + inches_per_hour
+
+    return totals
 
 
 def get_weather_emoji(
@@ -187,8 +254,9 @@ def format_period_detail_html(period: Dict) -> str:
     return "".join(lines)
 
 
-def format_summary_boxes_html(day: Optional[Dict], night: Optional[Dict]) -> str:
-    """Render the side-by-side Day/Night H/L summary boxes for one date."""
+def format_summary_boxes_html(day: Optional[Dict], night: Optional[Dict], rain_inches: Optional[float]) -> str:
+    """Render the Day/Night H/L summary boxes for one date, plus a third
+    Rain Total box - only shown when rain_inches is a positive amount."""
     box_style = (
         "flex:1;background:#f5f5f5;border-radius:8px;"
         "padding:10px 14px;display:flex;align-items:center;gap:10px;"
@@ -225,13 +293,33 @@ def format_summary_boxes_html(day: Optional[Dict], night: Optional[Dict]) -> str
             f"</div>"
         )
 
+    # Rain Total box - omitted entirely for days with no forecast rain
+    # (rain_inches is None or 0), rather than showing "0.00 in".
+    if rain_inches:
+        cells.append(
+            f"<div style='{box_style}'>"
+            f"<span style='font-size:22px;'>\U0001f4a7</span>"
+            f"<span><span style='display:block;font-size:12px;color:#666;'>Rain Total</span>"
+            f"<span style='font-size:17px;font-weight:bold;'>{rain_inches:.2f} in</span></span>"
+            f"</div>"
+        )
+
     return f"<div style='display:flex;gap:12px;margin-bottom:14px;'>{''.join(cells)}</div>"
 
 
-def format_forecast_html(station_name: str, periods: List[Dict], generated_at: str) -> str:
+def format_forecast_html(
+    station_name: str,
+    periods: List[Dict],
+    generated_at: str,
+    rain_totals: Optional[Dict] = None,
+) -> str:
     """Format NWS forecast periods into the full HTML email body: a header
-    with the generation timestamp, then one section per day with side-by-side
-    Day/Night summary boxes followed by the detailed bolded forecast text."""
+    with the generation timestamp, then one section per day with Day/Night
+    (and, when applicable, Rain Total) summary boxes followed by the
+    detailed bolded forecast text. rain_totals is {date: inches} from
+    fetch_daily_rain_totals(); pass None/{} to omit rain boxes entirely."""
+    rain_totals = rain_totals or {}
+
     parts = [
         f"<p style='font-size:15px;font-weight:bold;margin:0 0 4px;'>{station_name} Forecast (Home Station)</p>",
         f"<p style='font-size:13px;color:#666;margin:0 0 14px;'>Generated on {generated_at}</p>",
@@ -242,14 +330,25 @@ def format_forecast_html(station_name: str, periods: List[Dict], generated_at: s
 
     for idx, day in enumerate(days):
         ref_period = day['day'] or day['night']
-        date_label = format_date_label(ref_period.get('startTime'))
+        start_time = ref_period.get('startTime')
+        date_label = format_date_label(start_time)
         divider = "padding-top:18px;border-top:1px solid #ddd;" if idx > 0 else ""
+
+        # Look up this day's rain total using the same local calendar date
+        # the periods themselves are anchored to.
+        rain_inches = None
+        if start_time:
+            try:
+                period_date = datetime.fromisoformat(start_time).astimezone(LOCAL_TZ).date()
+                rain_inches = rain_totals.get(period_date)
+            except ValueError:
+                pass
 
         parts.append(f"<div style='margin-bottom:20px;{divider}'>")
         if date_label:
             parts.append(f"<p style='font-size:14px;font-weight:bold;margin:0 0 8px;'>{date_label}</p>")
 
-        parts.append(format_summary_boxes_html(day['day'], day['night']))
+        parts.append(format_summary_boxes_html(day['day'], day['night'], rain_inches))
 
         if day['day']:
             parts.append(format_period_detail_html(day['day']))
@@ -300,12 +399,17 @@ def main():
 
     periods, metadata = nws_result
 
+    # Fetch rain totals separately - a failure here shouldn't block the
+    # email, since fetch_daily_rain_totals() already degrades to {} on
+    # error and format_forecast_html() simply omits the Rain Total box.
+    rain_totals = fetch_daily_rain_totals()
+
     # Compute the current time in Arizona (fixed UTC-7, no DST) for the
     # "Generated on" header, since GitHub Actions runners run in UTC.
     generated_at_dt = datetime.now(timezone.utc) + ARIZONA_UTC_OFFSET
     generated_at = generated_at_dt.strftime("%B %-d, %Y at %-I:%M %p")
 
-    body_html = format_forecast_html(station_name, periods, generated_at)
+    body_html = format_forecast_html(station_name, periods, generated_at, rain_totals)
     subject = f"{station_name} Forecast"
 
     send_forecast_email(body_html, subject)
