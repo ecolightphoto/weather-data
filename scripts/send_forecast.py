@@ -11,7 +11,8 @@ the snapshot-archival workflow.
 import os
 import re
 import smtplib
-from datetime import datetime, timezone, timedelta
+import urllib.parse
+from datetime import datetime, timezone, timedelta, date as date_type
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Dict, List, Optional
@@ -20,7 +21,6 @@ from zoneinfo import ZoneInfo
 from fetch_forecasts import (
     fetch_nws_forecast,
     fetch_json,
-    fetch_wu_hourly_observations,
     log,
     FLAGSTAFF_LATITUDE,
     FLAGSTAFF_LONGITUDE,
@@ -104,65 +104,88 @@ def fetch_daily_rain_totals() -> Dict:
     return totals
 
 
-def compute_yesterday_actuals(observations: List[Dict]) -> Dict:
-    """Aggregate WU PWS hourly observations (from fetch_wu_hourly_observations)
-    into yesterday's actual high/low temp and rain total, using Arizona local
-    calendar days. Returns {'date': date, 'high': float|None, 'low': float|None,
-    'rain': float|None}. Any value is None if no data was available for it.
-
-    Rain uses max(precip) rather than sum(), since WU's precipTotal field is
-    a running cumulative total that resets at local midnight - the last
-    reading of the day already reflects that day's full rainfall.
+def fetch_wu_daily_history(station_id: str, target_date: date_type) -> List[Dict]:
+    """Fetch WU PWS historical observations for a specific calendar date via
+    the /v2/pws/history/all endpoint. Unlike /observations/all/1day (which,
+    per testing, returns only today-so-far rather than a trailing 24 hours),
+    this endpoint is scoped to exactly the requested date, so it reliably
+    captures all of "yesterday" regardless of what time this script runs.
+    Returns [] on any failure, so a history-fetch outage just means the
+    actuals section is omitted rather than the whole email failing.
     """
-    yesterday_date = (datetime.now(LOCAL_TZ) - timedelta(days=1)).date()
+    api_key = os.getenv('WU_API_KEY')
+    if not api_key:
+        log("⚠️  WU_API_KEY not set - skipping yesterday's actuals section")
+        return []
+
+    params = {
+        'stationId': station_id,
+        'format': 'json',
+        'units': 'e',
+        'date': target_date.strftime('%Y%m%d'),
+        'apiKey': api_key,
+    }
+    url = f"https://api.weather.com/v2/pws/history/all?{urllib.parse.urlencode(params)}"
+    data = fetch_json(url)
+
+    if not data or 'observations' not in data:
+        log(f"⚠️  Failed to fetch WU history for {target_date} - actuals will be omitted")
+        return []
+
+    observations = data['observations']
 
     # TEMPORARY DEBUG - remove once the actuals section is confirmed working.
-    log(
-        f"actuals debug: {len(observations)} observations received, "
-        f"target yesterday_date={yesterday_date}"
-    )
+    log(f"actuals debug: fetched {len(observations)} history entries for {target_date}")
     if observations:
-        sample = observations[0]
-        log(f"actuals debug: sample observation = {sample}")
+        log(f"actuals debug: sample history entry = {observations[0]}")
 
-    temps = []
+    return observations
+
+
+def compute_actuals_from_history(observations: List[Dict], target_date: date_type) -> Dict:
+    """Aggregate WU PWS historical observations (from fetch_wu_daily_history)
+    into that day's actual high/low temp and rain total. Returns
+    {'date': date, 'high': float|None, 'low': float|None, 'rain': float|None}.
+    Any value is None if no data was available for it.
+
+    Each history entry already covers the requested calendar day, and its
+    imperial block reports that interval's own tempHigh/tempLow plus a
+    precipTotal that's a running cumulative total for the day (resets at
+    local midnight) - so the day's overall high/low/rain are simply the
+    max tempHigh, min tempLow, and max precipTotal across all entries.
+    """
+    highs = []
+    lows = []
     precip_values = []
-    matched_dates = set()
 
     for obs in observations:
-        obs_time = obs.get('time')
-        if not obs_time:
-            continue
-        try:
-            dt_utc = datetime.fromisoformat(obs_time.replace('Z', '+00:00'))
-        except ValueError:
-            continue
+        imperial = obs.get('imperial') or {}
 
-        local_dt = dt_utc.astimezone(LOCAL_TZ)
-        matched_dates.add(local_dt.date())
-        if local_dt.date() != yesterday_date:
-            continue
+        temp_high = imperial.get('tempHigh')
+        if temp_high is not None:
+            highs.append(temp_high)
 
-        temp = obs.get('temp')
-        if temp is not None:
-            temps.append(temp)
+        temp_low = imperial.get('tempLow')
+        if temp_low is not None:
+            lows.append(temp_low)
 
-        precip = obs.get('precip')
-        if precip is not None:
-            precip_values.append(precip)
+        precip_total = imperial.get('precipTotal')
+        if precip_total is not None:
+            precip_values.append(precip_total)
 
-    # TEMPORARY DEBUG - remove once the actuals section is confirmed working.
-    log(
-        f"actuals debug: local dates seen across all observations = {sorted(matched_dates)}, "
-        f"temps matched for yesterday={len(temps)}, precip matched={len(precip_values)}"
-    )
-
-    return {
-        'date': yesterday_date,
-        'high': max(temps) if temps else None,
-        'low': min(temps) if temps else None,
+    result = {
+        'date': target_date,
+        'high': max(highs) if highs else None,
+        'low': min(lows) if lows else None,
         'rain': max(precip_values) if precip_values else None,
     }
+
+    # TEMPORARY DEBUG - remove once the actuals section is confirmed working.
+    log(f"actuals debug: computed result = {result}")
+
+    return result
+
+
 
 
 def format_actuals_html(actuals: Dict) -> str:
@@ -522,13 +545,14 @@ def main():
     rain_totals = fetch_daily_rain_totals()
 
     # Fetch yesterday's actual station observations (high/low/rain) from
-    # the WU PWS, if a station is configured. Degrades gracefully: no
-    # STATION_ID, no WU_API_KEY, or a failed fetch all just mean the
-    # actuals section is omitted rather than the email failing.
+    # the WU PWS history endpoint, if a station is configured. Degrades
+    # gracefully: no STATION_ID, no WU_API_KEY, or a failed fetch all just
+    # mean the actuals section is omitted rather than the email failing.
     station_id = os.getenv('STATION_ID')
     if station_id:
-        observations = fetch_wu_hourly_observations(station_id)
-        actuals = compute_yesterday_actuals(observations)
+        yesterday_date = (datetime.now(LOCAL_TZ) - timedelta(days=1)).date()
+        history_obs = fetch_wu_daily_history(station_id, yesterday_date)
+        actuals = compute_actuals_from_history(history_obs, yesterday_date)
     else:
         log("⚠️  STATION_ID not set - skipping yesterday's actuals section")
         actuals = None
