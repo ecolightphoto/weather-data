@@ -22,4 +22,6 @@ jobs:
           GMAIL_ADDRESS: ${{ secrets.GMAIL_ADDRESS }}
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          STATION_ID: ${{ secrets.STATION_ID }}
+          WU_API_KEY: ${{ secrets.WU_API_KEY }}
         run: python scripts/send_forecast.py
