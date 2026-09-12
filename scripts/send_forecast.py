@@ -223,19 +223,22 @@ def group_periods_into_days(periods: List[Dict]) -> List[Dict]:
 
 
 def format_date_label(start_time: Optional[str]) -> str:
-    """Format an NWS period's startTime into a 'Month Day' label."""
+    """Format an NWS period's startTime into a 'Weekday, Month Day' label,
+    e.g. 'Saturday, September 12'."""
     if not start_time:
         return ""
     try:
         dt = datetime.fromisoformat(start_time)
-        return dt.strftime("%B %-d")
+        return dt.strftime("%A, %B %-d")
     except ValueError:
         return ""
 
 
-def format_period_detail_html(period: Dict) -> str:
-    """Render one period's bolded summary line plus wind/detailed text."""
-    name = period.get('name', 'Unknown')
+def format_period_detail_html(period: Dict, label: str) -> str:
+    """Render one period's bolded summary line plus wind/detailed text.
+    label is a generic prefix ('Day' or 'Night') rather than the period's
+    own name (e.g. 'Saturday'/'Saturday Night'), since the day-of-week now
+    appears once in the date header above instead of per period."""
     temp = period.get('temperature')
     temp_unit = period.get('temperatureUnit', '')
     short_forecast = period.get('shortForecast', '')
@@ -244,7 +247,7 @@ def format_period_detail_html(period: Dict) -> str:
     detailed = period.get('detailedForecast', '')
 
     lines = [f"<p style='margin:0 0 10px;'>"]
-    lines.append(f"<b>{name}: {temp}\u00b0{temp_unit}, {short_forecast}</b><br>")
+    lines.append(f"<b>{label}: {temp}\u00b0{temp_unit}, {short_forecast}</b><br>")
     if wind_speed:
         lines.append(f"Wind: {wind_speed} {wind_dir}".rstrip() + "<br>")
     if detailed:
@@ -351,9 +354,9 @@ def format_forecast_html(
         parts.append(format_summary_boxes_html(day['day'], day['night'], rain_inches))
 
         if day['day']:
-            parts.append(format_period_detail_html(day['day']))
+            parts.append(format_period_detail_html(day['day'], "Day"))
         if day['night']:
-            parts.append(format_period_detail_html(day['night']))
+            parts.append(format_period_detail_html(day['night'], "Night"))
 
         parts.append("</div>")
 
