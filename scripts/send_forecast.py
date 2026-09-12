@@ -20,6 +20,7 @@ from zoneinfo import ZoneInfo
 from fetch_forecasts import (
     fetch_nws_forecast,
     fetch_json,
+    fetch_wu_hourly_observations,
     log,
     FLAGSTAFF_LATITUDE,
     FLAGSTAFF_LONGITUDE,
@@ -101,6 +102,96 @@ def fetch_daily_rain_totals() -> Dict:
             totals[day] = totals.get(day, 0.0) + inches_per_hour
 
     return totals
+
+
+def compute_yesterday_actuals(observations: List[Dict]) -> Dict:
+    """Aggregate WU PWS hourly observations (from fetch_wu_hourly_observations)
+    into yesterday's actual high/low temp and rain total, using Arizona local
+    calendar days. Returns {'date': date, 'high': float|None, 'low': float|None,
+    'rain': float|None}. Any value is None if no data was available for it.
+
+    Rain uses max(precip) rather than sum(), since WU's precipTotal field is
+    a running cumulative total that resets at local midnight - the last
+    reading of the day already reflects that day's full rainfall.
+    """
+    yesterday_date = (datetime.now(LOCAL_TZ) - timedelta(days=1)).date()
+
+    temps = []
+    precip_values = []
+
+    for obs in observations:
+        obs_time = obs.get('time')
+        if not obs_time:
+            continue
+        try:
+            dt_utc = datetime.fromisoformat(obs_time.replace('Z', '+00:00'))
+        except ValueError:
+            continue
+
+        local_dt = dt_utc.astimezone(LOCAL_TZ)
+        if local_dt.date() != yesterday_date:
+            continue
+
+        temp = obs.get('temp')
+        if temp is not None:
+            temps.append(temp)
+
+        precip = obs.get('precip')
+        if precip is not None:
+            precip_values.append(precip)
+
+    return {
+        'date': yesterday_date,
+        'high': max(temps) if temps else None,
+        'low': min(temps) if temps else None,
+        'rain': max(precip_values) if precip_values else None,
+    }
+
+
+def format_actuals_html(actuals: Dict) -> str:
+    """Render the yesterday-actuals section: date header (with 'ACTUALS'
+    suffix) plus plain, icon-free High/Low/Rain boxes. Returns '' entirely
+    if no high or low data was available (e.g. station was offline), since
+    a section with nothing but dashes isn't worth showing."""
+    if actuals.get('high') is None and actuals.get('low') is None:
+        return ""
+
+    box_style = "flex:1;background:#f5f5f5;border-radius:8px;padding:10px 14px;"
+    label_style = "display:block;font-size:12px;color:#666;margin:0;"
+    value_style = "font-size:17px;font-weight:bold;margin:0;"
+
+    date_label = actuals['date'].strftime("%A, %B %-d")
+
+    cells = []
+    if actuals.get('high') is not None:
+        cells.append(
+            f"<div style='{box_style}'>"
+            f"<p style='{label_style}'>Actual High</p>"
+            f"<p style='{value_style}'>{actuals['high']:.0f}\u00b0F</p>"
+            f"</div>"
+        )
+    if actuals.get('low') is not None:
+        cells.append(
+            f"<div style='{box_style}'>"
+            f"<p style='{label_style}'>Actual Low</p>"
+            f"<p style='{value_style}'>{actuals['low']:.0f}\u00b0F</p>"
+            f"</div>"
+        )
+    if actuals.get('rain'):
+        cells.append(
+            f"<div style='{box_style}'>"
+            f"<p style='{label_style}'>Actual Rain</p>"
+            f"<p style='{value_style}'>{actuals['rain']:.2f} in</p>"
+            f"</div>"
+        )
+
+    return (
+        f"<div style='margin-bottom:20px;'>"
+        f"<p style='font-size:14px;font-weight:bold;margin:0 0 8px;'>{date_label} &mdash; ACTUALS</p>"
+        f"<div style='display:flex;gap:12px;'>{''.join(cells)}</div>"
+        f"</div>"
+        f"<hr style='border:none;border-top:1px solid #ddd;margin:20px 0;'>"
+    )
 
 
 def get_weather_emoji(
@@ -315,12 +406,15 @@ def format_forecast_html(
     periods: List[Dict],
     generated_at: str,
     rain_totals: Optional[Dict] = None,
+    actuals: Optional[Dict] = None,
 ) -> str:
     """Format NWS forecast periods into the full HTML email body: a header
-    with the generation timestamp, then one section per day with Day/Night
-    (and, when applicable, Rain Total) summary boxes followed by the
-    detailed bolded forecast text. rain_totals is {date: inches} from
-    fetch_daily_rain_totals(); pass None/{} to omit rain boxes entirely."""
+    with the generation timestamp, an optional yesterday-actuals section,
+    then one section per day with Day/Night (and, when applicable, Rain
+    Total) summary boxes followed by the detailed bolded forecast text.
+    rain_totals is {date: inches} from fetch_daily_rain_totals(); pass
+    None/{} to omit rain boxes entirely. actuals is the dict returned by
+    compute_yesterday_actuals(); pass None to omit the actuals section."""
     rain_totals = rain_totals or {}
 
     parts = [
@@ -328,6 +422,9 @@ def format_forecast_html(
         f"<p style='font-size:13px;color:#666;margin:0 0 14px;'>Generated on {generated_at}</p>",
         "<hr style='border:none;border-top:1px solid #ddd;margin:0 0 18px;'>",
     ]
+
+    if actuals:
+        parts.append(format_actuals_html(actuals))
 
     days = group_periods_into_days(periods)
 
@@ -407,12 +504,24 @@ def main():
     # error and format_forecast_html() simply omits the Rain Total box.
     rain_totals = fetch_daily_rain_totals()
 
+    # Fetch yesterday's actual station observations (high/low/rain) from
+    # the WU PWS, if a station is configured. Degrades gracefully: no
+    # STATION_ID, no WU_API_KEY, or a failed fetch all just mean the
+    # actuals section is omitted rather than the email failing.
+    station_id = os.getenv('STATION_ID')
+    if station_id:
+        observations = fetch_wu_hourly_observations(station_id)
+        actuals = compute_yesterday_actuals(observations)
+    else:
+        log("⚠️  STATION_ID not set - skipping yesterday's actuals section")
+        actuals = None
+
     # Compute the current time in Arizona (fixed UTC-7, no DST) for the
     # "Generated on" header, since GitHub Actions runners run in UTC.
     generated_at_dt = datetime.now(timezone.utc) + ARIZONA_UTC_OFFSET
     generated_at = generated_at_dt.strftime("%B %-d, %Y at %-I:%M %p")
 
-    body_html = format_forecast_html(station_name, periods, generated_at, rain_totals)
+    body_html = format_forecast_html(station_name, periods, generated_at, rain_totals, actuals)
     subject = f"{station_name} Forecast"
 
     send_forecast_email(body_html, subject)
