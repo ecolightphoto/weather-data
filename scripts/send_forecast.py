@@ -116,8 +116,18 @@ def compute_yesterday_actuals(observations: List[Dict]) -> Dict:
     """
     yesterday_date = (datetime.now(LOCAL_TZ) - timedelta(days=1)).date()
 
+    # TEMPORARY DEBUG - remove once the actuals section is confirmed working.
+    log(
+        f"actuals debug: {len(observations)} observations received, "
+        f"target yesterday_date={yesterday_date}"
+    )
+    if observations:
+        sample = observations[0]
+        log(f"actuals debug: sample observation = {sample}")
+
     temps = []
     precip_values = []
+    matched_dates = set()
 
     for obs in observations:
         obs_time = obs.get('time')
@@ -129,6 +139,7 @@ def compute_yesterday_actuals(observations: List[Dict]) -> Dict:
             continue
 
         local_dt = dt_utc.astimezone(LOCAL_TZ)
+        matched_dates.add(local_dt.date())
         if local_dt.date() != yesterday_date:
             continue
 
@@ -139,6 +150,12 @@ def compute_yesterday_actuals(observations: List[Dict]) -> Dict:
         precip = obs.get('precip')
         if precip is not None:
             precip_values.append(precip)
+
+    # TEMPORARY DEBUG - remove once the actuals section is confirmed working.
+    log(
+        f"actuals debug: local dates seen across all observations = {sorted(matched_dates)}, "
+        f"temps matched for yesterday={len(temps)}, precip matched={len(precip_values)}"
+    )
 
     return {
         'date': yesterday_date,
